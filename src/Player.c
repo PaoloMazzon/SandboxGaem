@@ -1,4 +1,5 @@
 #include "Player.h"
+#include <malloc.h>
 
 // Returns -1 for negative numbers, 1 for positive, and 0 for zero
 static inline double sign(double x) {
@@ -8,13 +9,16 @@ static inline double sign(double x) {
 
 ////////////////////////////////////////////////////////////
 void onPlayerCreate(JamWorld* world, JamEntity* self) {
+	self->userData = (PlayerData*)malloc(sizeof(PlayerData));
 
+	if (self->userData == NULL)
+		jSetError(ERROR_ALLOC_FAILED, "Failed to allocate player data");
 }
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
 void onPlayerDestroy(JamWorld* world, JamEntity* self) {
-
+	free(self->userData);
 }
 ////////////////////////////////////////////////////////////
 
@@ -24,25 +28,24 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	
 	// Movement
 	self->hSpeed = (-jamInputCheckKey(JAM_KB_LEFT) + jamInputCheckKey(JAM_KB_RIGHT)) * 3;
-	self->vSpeed = (-jamInputCheckKey(JAM_KB_UP) + jamInputCheckKey(JAM_KB_DOWN)) * 3;
-	
-	//self->vSpeed += 0.5; // Gravity
-	//if (jamInputCheckKey(JAM_KB_UP) && jamCheckMapCollFast(world->worldMaps[0], self->x, self->y + 1, 16, 32))
-	//self->vSpeed = -7;
+	self->vSpeed += 0.5; // Gravity
+	if (jamInputCheckKey(JAM_KB_UP) && jamCheckEntityTileMapCollision(world->worldMaps[0], self->x, self->y + 1))
+		self->vSpeed = -7;
 
 	// Collisions
-	if (jamCheckMapCollision(world->worldMaps[0], self->x + self->hSpeed, self->y, 16, 24)) {
+	if (jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x + self->hSpeed, self->y)) {
 		speedSign = sign(self->hSpeed);
-		while (jamCheckMapCollision(world->worldMaps[0], self->x + speedSign, self->y, 16, 24))
+		while (!jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x + speedSign, self->y))
 			self->x += speedSign;
 		self->hSpeed = 0;
 	}
-	if (jamCheckMapCollision(world->worldMaps[0], self->x, self->y + self->vSpeed, 16, 24)) {
+	if (jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + self->vSpeed)) {
 		speedSign = sign(self->vSpeed);
-		while (jamCheckMapCollision(world->worldMaps[0], self->x, self->y + speedSign, 16, 24))
+		while (!jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + speedSign))
 			self->y += speedSign;
 		self->vSpeed = 0;
 	}
+	
 	self->x += self->hSpeed;
 	self->y += self->vSpeed;
 }
