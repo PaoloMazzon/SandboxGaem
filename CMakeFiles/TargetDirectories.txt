@@ -1,3 +1,0 @@
-/home/pdmazzon/gaem/CMakeFiles/rebuild_cache.dir
-/home/pdmazzon/gaem/CMakeFiles/edit_cache.dir
-/home/pdmazzon/gaem/CMakeFiles/SideScrollerSandbox.dir

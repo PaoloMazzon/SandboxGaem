@@ -1,1 +1,0 @@
-/usr/bin/cc     CMakeFiles/SideScrollerSandbox.dir/main.c.o CMakeFiles/SideScrollerSandbox.dir/src/Player.c.o  -o SideScrollerSandbox -rdynamic -lm /home/pdmazzon/jamengine/libJamEngine.a -Wl,-Bstatic -lSDL2main -Wl,-Bdynamic -lSDL2 -lpthread -lalut -lSDL2_image -lxml2 -lopenal 
