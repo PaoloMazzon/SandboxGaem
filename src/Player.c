@@ -9,16 +9,16 @@ static inline double sign(double x) {
 
 ////////////////////////////////////////////////////////////
 void onPlayerCreate(JamWorld* world, JamEntity* self) {
-	self->userData = (PlayerData*)malloc(sizeof(PlayerData));
+	self->data = (PlayerData*)malloc(sizeof(PlayerData));
 
-	if (self->userData == NULL)
+	if (self->data == NULL)
 		jSetError(ERROR_ALLOC_FAILED, "Failed to allocate player data");
 }
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
 void onPlayerDestroy(JamWorld* world, JamEntity* self) {
-	free(self->userData);
+	free(self->data);
 }
 ////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	// Movement
 	self->hSpeed = (-jamInputCheckKey(JAM_KB_LEFT) + jamInputCheckKey(JAM_KB_RIGHT)) * 3;
 	self->vSpeed += 0.5; // Gravity
-	if (jamInputCheckKey(JAM_KB_UP) && jamCheckEntityTileMapCollision(world->worldMaps[0], self->x, self->y + 1))
+	if (jamInputCheckKey(JAM_KB_UP) && jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1))
 		self->vSpeed = -7;
 
 	// Collisions
