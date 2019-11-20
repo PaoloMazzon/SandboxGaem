@@ -1,6 +1,12 @@
 #include "Player.h"
 #include <malloc.h>
 
+/////////////// Player Globals ///////////////
+extern JamAssetHandler* gGameData;
+static JamSprite* gPlayerWalkSprite;
+static JamSprite* gPlayerStandSprite;
+static JamSprite* gPlayerJumpSprite;
+
 // Returns -1 for negative numbers, 1 for positive, and 0 for zero
 static inline double sign(double x) {
 	if (x == 0) return 0;
@@ -9,10 +15,15 @@ static inline double sign(double x) {
 
 ////////////////////////////////////////////////////////////
 void onPlayerCreate(JamWorld* world, JamEntity* self) {
+	// The players data struct
 	self->data = (PlayerData*)malloc(sizeof(PlayerData));
-
 	if (self->data == NULL)
 		jSetError(ERROR_ALLOC_FAILED, "Failed to allocate player data");
+    
+	// Grab player sprites from the handler
+	gPlayerWalkSprite = jamGetSpriteFromHandler(gGameData, "PlayerMovingSprite");
+	gPlayerStandSprite = jamGetSpriteFromHandler(gGameData, "PlayerStandingSprite");
+	gPlayerJumpSprite = jamGetSpriteFromHandler(gGameData, "PlayerJumpingSprite");
 }
 ////////////////////////////////////////////////////////////
 
@@ -32,6 +43,18 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	if (jamInputCheckKey(JAM_KB_UP) && jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1))
 		self->vSpeed = -9;
 
+	// Change sprites and direction facing before hspeed potentially gets zeroed during collisions
+	if (!jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1))
+		self->sprite = gPlayerJumpSprite;
+	else if (self->hSpeed != 0)
+		self->sprite = gPlayerWalkSprite;
+	else
+		self->sprite = gPlayerStandSprite;
+	if (self->hSpeed > 0)
+		self->scaleX = 1;
+	else if (self->hSpeed < 0)
+		self->scaleX = -1;
+	
 	// Collisions
 	if (jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x + self->hSpeed, self->y)) {
 		speedSign = sign(self->hSpeed);
@@ -61,7 +84,7 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 		flicker = !flicker;
 
 	if (collision && flicker)
-		jamDrawRectangle(self->x + self->hitboxOffsetX, self->y + self->hitboxOffsetY, 8, 30);
+		jamDrawEntity(self);
 	else if (!collision)
 		jamDrawEntity(self);
 }
