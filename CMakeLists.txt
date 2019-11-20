@@ -11,5 +11,5 @@ include_directories(include /usr/include/SDL2 ${LibXml2_INCLUDE_DIR} ${OPENAL_IN
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 
-add_executable(${PROJECT_NAME} main.c src/Player.c)
+add_executable(${PROJECT_NAME} main.c src/Player.c src/BasicEnemy.c)
 target_link_libraries(${PROJECT_NAME} m /home/pdmazzon/jamengine/libJamEngine.a ${SDL2_LIBRARY} ${ALUT_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${LIBXML2_LIBRARIES} ${OPENAL_LIBRARY})

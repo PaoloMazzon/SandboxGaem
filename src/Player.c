@@ -30,7 +30,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	self->hSpeed = (-jamInputCheckKey(JAM_KB_LEFT) + jamInputCheckKey(JAM_KB_RIGHT)) * 3;
 	self->vSpeed += 0.5; // Gravity
 	if (jamInputCheckKey(JAM_KB_UP) && jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1))
-		self->vSpeed = -7;
+		self->vSpeed = -9;
 
 	// Collisions
 	if (jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x + self->hSpeed, self->y)) {
@@ -53,6 +53,16 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 
 ////////////////////////////////////////////////////////////
 void onPlayerDraw(JamWorld* world, JamEntity* self) {
-	jamDrawEntity(self);
+	static bool flicker = false;
+	static uint64 timer = 0;
+	bool collision = jamEntityListCollision(self->x, self->y, self, world->entityTypes[et_NPC]);
+
+	if (++timer % 10 == 0)
+		flicker = !flicker;
+
+	if (collision && flicker)
+		jamDrawRectangle(self->x + self->hitboxOffsetX, self->y + self->hitboxOffsetY, 8, 30);
+	else if (!collision)
+		jamDrawEntity(self);
 }
 ////////////////////////////////////////////////////////////
