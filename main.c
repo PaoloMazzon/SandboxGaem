@@ -10,7 +10,7 @@ void runGame() {
 
 	// Data we're allocating and need to free
 	JamBehaviourMap* bMap = jamCreateBehaviourMap();
-	gGameData = jamCreateAssetHandler();
+	gGameData = jamCreateAssetHandler(1000);
 	
 	// Data handled by the asset handler (not our problem)
 	JamWorld* gameWorld;

@@ -1,55 +1,80 @@
 #include "Player.h"
 #include <malloc.h>
+#include <math.h>
+
+// How many frames (in delta time) should the flicker last
+#define FLICKER_FRAMES 10
 
 /////////////// Player Globals ///////////////
 extern JamAssetHandler* gGameData;
-static JamSprite* gPlayerWalkSprite;
-static JamSprite* gPlayerStandSprite;
-static JamSprite* gPlayerJumpSprite;
-
-// Returns -1 for negative numbers, 1 for positive, and 0 for zero
-static inline double sign(double x) {
-	if (x == 0) return 0;
-	return (x < 0 ? -1 : 1);
-}
+static double gFlicker; // This is to flicker when the player gets hit for x frames
+static int gPlayerHP = 100;
 
 ////////////////////////////////////////////////////////////
 void onPlayerCreate(JamWorld* world, JamEntity* self) {
-	// The players data struct
-	self->data = (PlayerData*)malloc(sizeof(PlayerData));
-	if (self->data == NULL)
-		jSetError(ERROR_ALLOC_FAILED, "Failed to allocate player data");
-    
-	// Grab player sprites from the handler
-	gPlayerWalkSprite = jamGetSpriteFromHandler(gGameData, "PlayerMovingSprite");
-	gPlayerStandSprite = jamGetSpriteFromHandler(gGameData, "PlayerStandingSprite");
-	gPlayerJumpSprite = jamGetSpriteFromHandler(gGameData, "PlayerJumpingSprite");
+	
 }
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
 void onPlayerDestroy(JamWorld* world, JamEntity* self) {
-	free(self->data);
+    
 }
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
 void onPlayerFrame(JamWorld* world, JamEntity* self) {
+	/////// INITIALISE STATICS
+	static JamSprite* sPlayerWalkSprite = NULL;
+	static JamSprite* sPlayerStandSprite = NULL;
+	static JamSprite* sPlayerJumpSprite = NULL;
+	if (sPlayerWalkSprite == NULL && sPlayerStandSprite == NULL && sPlayerJumpSprite == NULL) {
+		sPlayerWalkSprite = jamGetSpriteFromHandler(gGameData, "PlayerMovingSprite");
+		sPlayerStandSprite = jamGetSpriteFromHandler(gGameData, "PlayerStandingSprite");
+		sPlayerJumpSprite = jamGetSpriteFromHandler(gGameData, "PlayerJumpingSprite");
+	}
+
+	// Other variables
 	register double speedSign;
+	JamEntity* collEnemy = jamEntityListCollision(self->x, self->y, self, world->entityTypes[et_NPC]);
 	
-	// Movement
-	self->hSpeed = (-jamInputCheckKey(JAM_KB_LEFT) + jamInputCheckKey(JAM_KB_RIGHT)) * 3;
+	// Throw the player away from the enemy if colliding
+	if (collEnemy != NULL && false) {
+		self->hSpeed = sign(self->x - collEnemy->x) * 5;
+		self->vSpeed = -5;
+		gFlicker = FLICKER_FRAMES;
+		gPlayerHP -= 10;
+	}
+	
+	// Movement/Acceleration
+	if (jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
+	    double left = -jamInputCheckKey(JAM_KB_LEFT);
+		double right = jamInputCheckKey(JAM_KB_RIGHT);
+		if (fabs(self->hSpeed) < 3)
+			self->hSpeed += (left + right);
+		if (!left && !right && self->hSpeed != 0) {
+			double old = sign(self->hSpeed);
+			self->hSpeed -= -sign(self->hSpeed);
+			if (old != sign(self->hSpeed))
+				self->hSpeed = 0;
+		}
+		if (fabs(self->hSpeed) > 3)
+			self->hSpeed = sign(self->hSpeed) * 3;
+	}
+	
+
+	// Jump
 	self->vSpeed += 0.5; // Gravity
 	if (jamInputCheckKey(JAM_KB_UP) && jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1))
 		self->vSpeed = -9;
 
 	// Change sprites and direction facing before hspeed potentially gets zeroed during collisions
 	if (!jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1))
-		self->sprite = gPlayerJumpSprite;
+		self->sprite = sPlayerJumpSprite;
 	else if (self->hSpeed != 0)
-		self->sprite = gPlayerWalkSprite;
+		self->sprite = sPlayerWalkSprite;
 	else
-		self->sprite = gPlayerStandSprite;
+		self->sprite = sPlayerStandSprite;
 	if (self->hSpeed > 0)
 		self->scaleX = 1;
 	else if (self->hSpeed < 0)
@@ -69,8 +94,8 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->vSpeed = 0;
 	}
 	
-	self->x += self->hSpeed;
-	self->y += self->vSpeed;
+	self->x += self->hSpeed * jamRendererGetDelta();
+	self->y += self->vSpeed * jamRendererGetDelta();
 }
 ////////////////////////////////////////////////////////////
 
@@ -78,14 +103,16 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	static bool flicker = false;
 	static uint64 timer = 0;
-	bool collision = jamEntityListCollision(self->x, self->y, self, world->entityTypes[et_NPC]);
 
+	if (gFlicker > 0)
+		gFlicker -= jamRendererGetDelta();
+	
 	if (++timer % 10 == 0)
 		flicker = !flicker;
 
-	if (collision && flicker)
+	if (gFlicker > 0 && flicker)
 		jamDrawEntity(self);
-	else if (!collision)
+	else if (!(gFlicker > 0))
 		jamDrawEntity(self);
 }
 ////////////////////////////////////////////////////////////
