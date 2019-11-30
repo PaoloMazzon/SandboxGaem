@@ -5,3 +5,4 @@ cmake_install.cmake
 SideScrollerSandbox
 run.sh
 Makefile
+cmake-build-debug/
