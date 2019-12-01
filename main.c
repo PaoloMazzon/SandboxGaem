@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <JamEngine.h>
 #include <EntityBehaviour.h>
+#include <SandConstants.h>
 
 // The global asset handler for the game
 JamAssetHandler* gGameData;
 
 void runGame() {
-	bool stopRunning;
+	bool stopRunning = false;
 
 	// Data we're allocating and need to free
 	JamBehaviourMap* bMap = jamCreateBehaviourMap();
@@ -22,10 +23,14 @@ void runGame() {
 	jamAssetLoadINI(gGameData, "assets/game.ini", bMap);
 	gameWorld = jamGetWorldFromHandler(gGameData, "GameWorld");
 	backgroundTex = jamGetTextureFromHandler(gGameData, "BackgroundTexture");
+
+	// Autotile the level
+	if (gameWorld != NULL)
+		jamAutoTileMap(gameWorld->worldMaps[0], jamGetSpriteFromHandler(gGameData, "DirtTilesetSprite"));
     
 	while (jamProcEvents() && !stopRunning && !jGetError()) {
 		// Draw the background and world
-	    jamDrawTexture(backgroundTex, 0, 0);
+	    jamDrawTexture(backgroundTex, (int)jamRendererGetCameraX(), (int)jamRendererGetCameraY());
 		jamDrawTileMap(gameWorld->worldMaps[0], 0, 0, 0, 0, 0, 0);
 
 		// Make escape exit the program
@@ -47,7 +52,7 @@ void runMenu() {
 
 int main(int argc, const char* argv[]) {
 	jamInitRenderer(&argc, (char**)argv, "Gaem", 480, 320, 60);
-	jamResetRenderer(480 * 2, 320 * 2, false);
+	jamResetRenderer(GAME_WIDTH * 2, GAME_HEIGHT * 2, false);
 	jamIntegerMaximizeScreenBuffer();
 	runMenu();
 	jamRendererQuit();

@@ -1,6 +1,8 @@
 #include "Player.h"
 #include <malloc.h>
 #include <math.h>
+#include <Tweening.h>
+#include <SandConstants.h>
 
 // How many frames (in delta time) should the flicker last
 #define FLICKER_FRAMES 90
@@ -51,14 +53,13 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	}
 
 	/* Movement is frictional and somewhat realistic
-	 *  1. Horizontal velocity can only change while on the ground/a collision
-	 *  2. Jumping reduces your horizontal speed by 25%
-	 *  3. Pressing left/right controls acceleration, not velocity
-	 *  4. Friction is only applied if you're on the ground and not pressing left/right
-	 *  5. Movement speed is capped at MAXIMUM_PLAYER_VELOCITY
-	 *  6. Gravity is applied at all times
-	 *  7. Jumping simply shoots the player's velocity upwards
-	 *  8. Movement is handled first, then animations, then collisions
+	 *  1. Friction is only applied while on the ground, movement mid-air is limited
+	 *  2. Pressing left/right controls acceleration, not velocity
+	 *  3. Friction is only applied if you're on the ground and not pressing left/right
+	 *  4. Movement speed is capped at MAXIMUM_PLAYER_VELOCITY
+	 *  5. Gravity is applied at all times
+	 *  6. Jumping simply shoots the player's velocity upwards
+	 *  7. Movement is handled first, then animations, then collisions
 	 */
 	if (jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
 	    double left = -jamInputCheckKey(JAM_KB_LEFT);
@@ -70,15 +71,22 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 			if (old != sign(self->hSpeed))
 				self->hSpeed = 0;
 		}
-		if (fabs(self->hSpeed) > MAXIMUM_PLAYER_VELOCITY)
-			self->hSpeed = sign(self->hSpeed) * MAXIMUM_PLAYER_VELOCITY;
+
+	} else {
+		// Slower movement mid-air
+		double left = -jamInputCheckKey(JAM_KB_LEFT);
+		double right = jamInputCheckKey(JAM_KB_RIGHT);
+		self->hSpeed += (left + right) * 0.15;
 	}
+
+	// Restrict velocity
+	if (fabs(self->hSpeed) > MAXIMUM_PLAYER_VELOCITY)
+		self->hSpeed = sign(self->hSpeed) * MAXIMUM_PLAYER_VELOCITY;
 
 	// Jump
 	self->vSpeed += 0.5; // Gravity
 	if (jamInputCheckKey(JAM_KB_UP) && jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
 		self->vSpeed = -9;
-		self->hSpeed *= 0.75;
 	}
 
 	// Change sprites and direction facing before hspeed potentially gets zeroed during collisions
@@ -107,8 +115,15 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->vSpeed = 0;
 	}
 	
+	// Update player position
 	self->x += self->hSpeed * jamRendererGetDelta();
 	self->y += self->vSpeed * jamRendererGetDelta();
+
+	// Tween the camera position towards the player
+	jamRendererMoveCamera(
+			((self->x - GAME_WIDTH / 2) - jamRendererGetCameraX()) * 0.25,
+			((self->y - GAME_HEIGHT / 2) - jamRendererGetCameraY()) * 0.25
+	);
 }
 ////////////////////////////////////////////////////////////
 
@@ -131,8 +146,8 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 
 	// Draw the player health
 	jamDrawSetColour(0, 0, 0, 255);
-	jamDrawRectangle(16, 16, 100, 16);
+	jamDrawRectangleFilled((int)jamRendererGetCameraX() + 16, (int)jamRendererGetCameraY() + 16, 100, 16);
 	jamDrawSetColour(255, 0, 0, 255);
-	jamDrawRectangle(17, 17, 98 * gPlayerHP / gMaxPlayerHP, 14);
+	jamDrawRectangleFilled((int)jamRendererGetCameraX() + 17, (int)jamRendererGetCameraY() + 17, 98 * gPlayerHP / gMaxPlayerHP, 14);
 }
 ////////////////////////////////////////////////////////////
