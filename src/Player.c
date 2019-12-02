@@ -8,7 +8,8 @@
 #define FLICKER_FRAMES 90
 
 // Maximum velocity of the player
-#define MAXIMUM_PLAYER_VELOCITY 3
+#define MAXIMUM_PLAYER_WALK_VELOCITY 3
+#define MAXIMUM_PLAYER_RUN_VELOCITY 5
 
 /////////////// Player Globals ///////////////
 extern JamAssetHandler* gGameData;
@@ -34,18 +35,23 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	static JamSprite* sPlayerWalkSprite = NULL;
 	static JamSprite* sPlayerStandSprite = NULL;
 	static JamSprite* sPlayerJumpSprite = NULL;
+	static bool sInvincible = false;
 	if (sPlayerWalkSprite == NULL && sPlayerStandSprite == NULL && sPlayerJumpSprite == NULL) {
 		sPlayerWalkSprite = jamGetSpriteFromHandler(gGameData, "PlayerMovingSprite");
 		sPlayerStandSprite = jamGetSpriteFromHandler(gGameData, "PlayerStandingSprite");
 		sPlayerJumpSprite = jamGetSpriteFromHandler(gGameData, "PlayerJumpingSprite");
 	}
 
+	// Debug
+	if (jamInputCheckKeyPressed(JAM_KB_F7))
+		sInvincible = !sInvincible;
+
 	// Other variables
 	register double speedSign;
 	JamEntity* collEnemy = jamEntityListCollision(self->x, self->y, self, world->entityTypes[et_NPC]);
 	
 	// Throw the player away from the enemy if colliding
-	if (collEnemy != NULL && gFlicker <= 0) {
+	if (collEnemy != NULL && gFlicker <= 0 && !sInvincible) {
 		self->hSpeed = sign(self->x - collEnemy->x) * 5;
 		self->vSpeed = -5;
 		gFlicker = FLICKER_FRAMES;
@@ -80,8 +86,9 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	}
 
 	// Restrict velocity
-	if (fabs(self->hSpeed) > MAXIMUM_PLAYER_VELOCITY)
-		self->hSpeed = sign(self->hSpeed) * MAXIMUM_PLAYER_VELOCITY;
+	double maxSpeed = jamInputCheckKey(JAM_KB_Z) ? MAXIMUM_PLAYER_RUN_VELOCITY : MAXIMUM_PLAYER_WALK_VELOCITY;
+ 	if (fabs(self->hSpeed) > maxSpeed)
+		self->hSpeed = sign(self->hSpeed) * maxSpeed;
 
 	// Jump
 	self->vSpeed += 0.5; // Gravity
@@ -122,7 +129,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	// Tween the camera position towards the player
 	jamRendererMoveCamera(
 			((self->x - GAME_WIDTH / 2) - jamRendererGetCameraX()) * 0.25,
-			((self->y - GAME_HEIGHT / 2) - jamRendererGetCameraY()) * 0.25
+			(((self->y - GAME_HEIGHT / 2) - 50) - jamRendererGetCameraY()) * 0.25
 	);
 }
 ////////////////////////////////////////////////////////////
