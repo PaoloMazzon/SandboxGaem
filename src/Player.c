@@ -109,18 +109,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->scaleX = -1;
 	
 	// Collisions
-	if (jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x + self->hSpeed, self->y)) {
-		speedSign = sign(self->hSpeed);
-		while (!jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x + speedSign, self->y))
-			self->x += speedSign;
-		self->hSpeed = 0;
-	}
-	if (jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + self->vSpeed)) {
-		speedSign = sign(self->vSpeed);
-		while (!jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + speedSign))
-			self->y += speedSign;
-		self->vSpeed = 0;
-	}
+	
 	
 	// Update player position
 	self->x += self->hSpeed * jamRendererGetDelta();
