@@ -109,7 +109,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->scaleX = -1;
 	
 	// Collisions
-	
+
 	
 	// Update player position
 	self->x += self->hSpeed * jamRendererGetDelta();
