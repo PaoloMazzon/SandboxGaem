@@ -66,8 +66,8 @@ void runMenu() {
 }
 
 int main(int argc, const char* argv[]) {
-	jamRendererInit(&argc, (char**)argv, "Gaem", 480, 320, 53);
-	jamRendererReset(GAME_WIDTH * 2, GAME_HEIGHT * 2, false);
+	jamRendererInit(&argc, (char**)argv, "Gaem", 480, 320, 54);
+	jamRendererReset(GAME_WIDTH, GAME_HEIGHT, false);
 	jamRendererIntegerScale();
 	runMenu();
 	jamRendererQuit();

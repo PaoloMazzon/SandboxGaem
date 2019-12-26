@@ -109,8 +109,15 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->scaleX = -1;
 	
 	// Collisions
+	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x + self->hSpeed, self->y)) {
+		jamEntitySnapX(self, world->worldMaps[0], (int)sign(self->hSpeed));
+		self->hSpeed = 0;
+	}
+	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + self->vSpeed)) {
+		jamEntitySnapY(self, world->worldMaps[0], (int)sign(self->vSpeed));
+		self->vSpeed = 0;
+	}
 
-	
 	// Update player position
 	self->x += self->hSpeed * jamRendererGetDelta();
 	self->y += self->vSpeed * jamRendererGetDelta();
