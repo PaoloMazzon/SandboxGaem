@@ -37,9 +37,9 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	static JamSprite* sPlayerJumpSprite = NULL;
 	static bool sInvincible = false;
 	if (sPlayerWalkSprite == NULL && sPlayerStandSprite == NULL && sPlayerJumpSprite == NULL) {
-		sPlayerWalkSprite = jamGetSpriteFromHandler(gGameData, "PlayerMovingSprite");
-		sPlayerStandSprite = jamGetSpriteFromHandler(gGameData, "PlayerStandingSprite");
-		sPlayerJumpSprite = jamGetSpriteFromHandler(gGameData, "PlayerJumpingSprite");
+		sPlayerWalkSprite = jamAssetHandlerGetSprite(gGameData, "PlayerMovingSprite");
+		sPlayerStandSprite = jamAssetHandlerGetSprite(gGameData, "PlayerStandingSprite");
+		sPlayerJumpSprite = jamAssetHandlerGetSprite(gGameData, "PlayerJumpingSprite");
 	}
 
 	// Debug
@@ -67,7 +67,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	 *  6. Jumping simply shoots the player's velocity upwards
 	 *  7. Movement is handled first, then animations, then collisions
 	 */
-	if (jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
+	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
 	    double left = -jamInputCheckKey(JAM_KB_LEFT);
 		double right = jamInputCheckKey(JAM_KB_RIGHT);
 		self->hSpeed += (left + right) * 0.25;
@@ -92,12 +92,12 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 
 	// Jump
 	self->vSpeed += 0.5; // Gravity
-	if (jamInputCheckKey(JAM_KB_UP) && jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
+	if (jamInputCheckKey(JAM_KB_UP) && jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
 		self->vSpeed = -9;
 	}
 
 	// Change sprites and direction facing before hspeed potentially gets zeroed during collisions
-	if (!jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1))
+	if (!jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1))
 		self->sprite = sPlayerJumpSprite;
 	else if (self->hSpeed != 0)
 		self->sprite = sPlayerWalkSprite;

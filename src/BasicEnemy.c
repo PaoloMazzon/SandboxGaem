@@ -10,8 +10,8 @@ void onBEnemyDestroy(JamWorld* world, JamEntity* self) {
 
 void onBEnemyFrame(JamWorld* world, JamEntity* self) {
 	double lookAhead = self->sprite->frames[0]->w * sign(self->hSpeed);
-    if (!jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x + lookAhead, self->y + 1)
-		|| jamCheckEntityTileMapCollision(self, world->worldMaps[0], self->x + self->hSpeed, self->y)) {
+    if (!jamEntityTileMapCollision(self, world->worldMaps[0], self->x + lookAhead, self->y + 1)
+		|| jamEntityTileMapCollision(self, world->worldMaps[0], self->x + self->hSpeed, self->y)) {
 		self->hSpeed = -self->hSpeed;
 	}
 

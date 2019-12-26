@@ -10,20 +10,20 @@ void runGame() {
 	bool stopRunning = false;
 
 	// Data we're allocating and need to free
-	JamBehaviourMap* bMap = jamCreateBehaviourMap();
-	gGameData = jamCreateAssetHandler(1000);
+	JamBehaviourMap* bMap = jamBehaviourMapCreate();
+	gGameData = jamAssetHandlerCreate(1000);
 	
 	// Data handled by the asset handler (not our problem)
 	JamWorld* gameWorld;
 	JamTexture* background1Tex, *background2Tex;
 	
 	// Load assets
-	jamAddBehaviourToMap(bMap, "PlayerBehaviour", onPlayerCreate, onPlayerDestroy, onPlayerFrame, onPlayerDraw);
-	jamAddBehaviourToMap(bMap, "BasicEnemyBehaviour", onBEnemyCreate, onBEnemyDestroy, onBEnemyFrame, onBEnemyDraw);
-	jamAssetLoadINI(gGameData, "assets/game.ini", bMap);
-	gameWorld = jamGetWorldFromHandler(gGameData, "GameWorld");
-	background1Tex = jamGetTextureFromHandler(gGameData, "BackLayer1Texture");
-	background2Tex = jamGetTextureFromHandler(gGameData, "BackLayer2Texture");
+	jamBehaviourMapAdd(bMap, "PlayerBehaviour", onPlayerCreate, onPlayerDestroy, onPlayerFrame, onPlayerDraw);
+	jamBehaviourMapAdd(bMap, "BasicEnemyBehaviour", onBEnemyCreate, onBEnemyDestroy, onBEnemyFrame, onBEnemyDraw);
+	jamAssetHandlerLoadINI(gGameData, "assets/game.ini", bMap);
+	gameWorld = jamAssetHandlerGetWorld(gGameData, "GameWorld");
+	background1Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer1Texture");
+	background2Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer2Texture");
 
 	// Game data
 	double camX;
@@ -31,9 +31,9 @@ void runGame() {
 
 	// Autotile the level
 	if (gameWorld != NULL)
-		jamAutoTileMap(gameWorld->worldMaps[0], jamGetSpriteFromHandler(gGameData, "DirtTilesetSprite"));
+		jamTileMapAuto(gameWorld->worldMaps[0], jamAssetHandlerGetSprite(gGameData, "DirtTilesetSprite"));
     
-	while (jamProcEvents() && !stopRunning && !jGetError()) {
+	while (jamRendererProcEvents() && !stopRunning && !jGetError()) {
 		// Double parallax background - 3 renders/background to cover all possible places
 		camX = jamRendererGetCameraX();
 		camY = jamRendererGetCameraY();
@@ -54,11 +54,11 @@ void runGame() {
 		
 		// Process the game frame
 		jamWorldProcFrame(gameWorld);
-		jamProcEndFrame();
+		jamRendererProcEndFrame();
 	}
 
-	jamFreeAssetHandler(gGameData);
-	jamFreeBehaviourMap(bMap);
+	jamAssetHandlerFree(gGameData);
+	jamBehaviourMapFree(bMap);
 }
 
 void runMenu() {
@@ -66,9 +66,9 @@ void runMenu() {
 }
 
 int main(int argc, const char* argv[]) {
-	jamInitRenderer(&argc, (char**)argv, "Gaem", 480, 320, 53);
-	jamResetRenderer(GAME_WIDTH * 2, GAME_HEIGHT * 2, false);
-	jamIntegerMaximizeScreenBuffer();
+	jamRendererInit(&argc, (char**)argv, "Gaem", 480, 320, 53);
+	jamRendererReset(GAME_WIDTH * 2, GAME_HEIGHT * 2, false);
+	jamRendererIntegerScale();
 	runMenu();
 	jamRendererQuit();
 	return 0;
