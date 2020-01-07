@@ -135,6 +135,11 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	// Flicker the sprite when damaged/draw player
 	static bool flicker = false;
 	static uint64 timer = 0;
+	static JamTexture* sHealthBarTex = NULL;
+
+	// Initialize statics
+	if (sHealthBarTex == NULL)
+		sHealthBarTex = jamAssetHandlerGetTexture(gGameData, "PlayerHealthBarTexture");
 
 	if (gFlicker > 0)
 		gFlicker -= jamRendererGetDelta();
@@ -148,9 +153,7 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 		jamDrawEntity(self);
 
 	// Draw the player health
-	jamDrawSetColour(0, 0, 0, 255);
-	jamDrawRectangleFilled((int)jamRendererGetCameraX() + 16, (int)jamRendererGetCameraY() + 16, 100, 16);
-	jamDrawSetColour(255, 0, 0, 255);
-	jamDrawRectangleFilled((int)jamRendererGetCameraX() + 17, (int)jamRendererGetCameraY() + 17, 98 * gPlayerHP / gMaxPlayerHP, 14);
+	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, 100, 16);
+	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, 0, 0, gPlayerHP, 16);
 }
 ////////////////////////////////////////////////////////////
