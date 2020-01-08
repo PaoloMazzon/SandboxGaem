@@ -71,6 +71,7 @@ int main(int argc, const char* argv[]) {
 	jamRendererInit(&argc, (char**)argv, "Gaem", 480, 320, 60);
 	jamRendererReset(GAME_WIDTH * DEFAULT_GAME_SCALE, GAME_HEIGHT * DEFAULT_GAME_SCALE, false);
 	jamRendererIntegerScale();
+	jamRendererSetIcon("assets/icon.png");
 	runMenu();
 	jamRendererQuit();
 	return 0;
