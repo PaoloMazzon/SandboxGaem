@@ -48,7 +48,8 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 
 	// Other variables
 	register double speedSign;
-	JamEntity* collEnemy = jamEntityListCollision(self->x, self->y, self, world->entityTypes[et_NPC]);
+	JamEntity* collEnemy = jamWorldEntityCollision(world, self, self->x, self->y);
+	collEnemy = (collEnemy != NULL && collEnemy->type == TYPE_ENEMY) ? collEnemy : NULL;
 	
 	// Throw the player away from the enemy if colliding
 	if (collEnemy != NULL && gFlicker <= 0 && !sInvincible) {
