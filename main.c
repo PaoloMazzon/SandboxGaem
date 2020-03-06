@@ -3,7 +3,7 @@
 #include <EntityBehaviour.h>
 #include <SandConstants.h>
 
-#define DEFAULT_GAME_SCALE 1
+#define DEFAULT_GAME_SCALE 2
 
 // The global asset handler for the game
 JamAssetHandler* gGameData;
@@ -68,7 +68,7 @@ void runMenu() {
 }
 
 int main(int argc, const char* argv[]) {
-	jamRendererInit(&argc, (char**)argv, "Gaem", 480, 320, 60);
+	jamRendererInit(&argc, (char**)argv, "Gaem", 480, 320, 54);
 	jamRendererReset(GAME_WIDTH * DEFAULT_GAME_SCALE, GAME_HEIGHT * DEFAULT_GAME_SCALE, false);
 	jamRendererIntegerScale();
 	jamRendererSetIcon("assets/icon.png");
