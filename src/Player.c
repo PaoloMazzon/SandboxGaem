@@ -19,7 +19,7 @@ static int gMaxPlayerHP = 100;
 
 ////////////////////////////////////////////////////////////
 void onPlayerCreate(JamWorld* world, JamEntity* self) {
-	
+
 }
 ////////////////////////////////////////////////////////////
 
@@ -41,10 +41,6 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		sPlayerStandSprite = jamAssetHandlerGetSprite(gGameData, "PlayerStandingSprite");
 		sPlayerJumpSprite = jamAssetHandlerGetSprite(gGameData, "PlayerJumpingSprite");
 	}
-
-	// Debug
-	if (jamInputCheckKeyPressed(JAM_KB_F7))
-		sInvincible = !sInvincible;
 
 	// Other variables
 	register double speedSign;
@@ -111,11 +107,11 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	
 	// Collisions
 	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x + self->hSpeed, self->y)) {
-		jamEntitySnapX(self, world->worldMaps[0], (int)sign(self->hSpeed));
+		//jamEntitySnapX(self, world->worldMaps[0], (int)sign(self->hSpeed));
 		self->hSpeed = 0;
 	}
 	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + self->vSpeed)) {
-		jamEntitySnapY(self, world->worldMaps[0], (int)sign(self->vSpeed));
+		//jamEntitySnapY(self, world->worldMaps[0], (int)sign(self->vSpeed));
 		self->vSpeed = 0;
 	}
 
@@ -128,6 +124,10 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 			((self->x - GAME_WIDTH / 2) - jamRendererGetCameraX()) * 0.25,
 			(((self->y - GAME_HEIGHT / 2) - 50) - jamRendererGetCameraY()) * 0.25
 	);
+
+	//////////////////////// Debug ////////////////////////
+	if (jamInputCheckKeyPressed(JAM_KB_F7))
+		sInvincible = !sInvincible;
 }
 ////////////////////////////////////////////////////////////
 
@@ -141,6 +141,16 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	// Initialize statics
 	if (sHealthBarTex == NULL)
 		sHealthBarTex = jamAssetHandlerGetTexture(gGameData, "PlayerHealthBarTexture");
+
+	/////////////////// DEBUG ///////////////////
+	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y)) {
+		jamDrawRectangleFilled(
+			(int)round(self->x + self->hitboxOffsetX),
+			(int)round(self->y + self->hitboxOffsetY),
+			(int)round(self->hitbox->width),
+			(int)round(self->hitbox->height)
+		);
+	}
 
 	if (gFlicker > 0)
 		gFlicker -= jamRendererGetDelta();
