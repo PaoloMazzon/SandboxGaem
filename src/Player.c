@@ -70,7 +70,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->hSpeed += (left + right) * 0.25;
 		if (left + right == 0) {
 			double old = sign(self->hSpeed);
-			self->hSpeed -= old * 0.25;
+			self->hSpeed -= old * 0.25 * jamRendererGetDelta();
 			if (old != sign(self->hSpeed))
 				self->hSpeed = 0;
 		}
@@ -79,7 +79,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		// Slower movement mid-air
 		double left = -jamInputCheckKey(JAM_KB_LEFT);
 		double right = jamInputCheckKey(JAM_KB_RIGHT);
-		self->hSpeed += (left + right) * 0.15;
+		self->hSpeed += (left + right) * 0.15 * jamRendererGetDelta();
 	}
 
 	// Restrict velocity
@@ -88,7 +88,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->hSpeed = sign(self->hSpeed) * maxSpeed;
 
 	// Jump
-	self->vSpeed += 0.5; // Gravity
+	self->vSpeed += 0.5 * jamRendererGetDelta(); // Gravity
 	if (jamInputCheckKey(JAM_KB_UP) && jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
 		self->vSpeed = -9;
 	}
@@ -104,20 +104,20 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->scaleX = 1;
 	else if (self->hSpeed < 0)
 		self->scaleX = -1;
-	
+
 	// Collisions
 	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x + self->hSpeed, self->y)) {
-		//jamEntitySnapX(self, world->worldMaps[0], (int)sign(self->hSpeed));
+		jamEntitySnapX(self, world->worldMaps[0], (int)sign(self->hSpeed));
 		self->hSpeed = 0;
 	}
 	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + self->vSpeed)) {
-		//jamEntitySnapY(self, world->worldMaps[0], (int)sign(self->vSpeed));
+		jamEntitySnapY(self, world->worldMaps[0], (int)sign(self->vSpeed));
 		self->vSpeed = 0;
 	}
 
 	// Update player position
-	self->x += self->hSpeed * jamRendererGetDelta();
-	self->y += self->vSpeed * jamRendererGetDelta();
+	self->x += self->hSpeed;
+	self->y += self->vSpeed;
 
 	// Tween the camera position towards the player
 	jamRendererMoveCamera(
