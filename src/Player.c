@@ -4,13 +4,6 @@
 #include <Tweening.h>
 #include <SandConstants.h>
 
-// How many frames (in delta time) should the flicker last
-#define FLICKER_FRAMES 90
-
-// Maximum velocity of the player
-#define MAXIMUM_PLAYER_WALK_VELOCITY 3
-#define MAXIMUM_PLAYER_RUN_VELOCITY 5
-
 /////////////// Player Globals ///////////////
 extern JamAssetHandler* gGameData;
 static double gFlicker; // This is to flicker when the player gets hit for x frames
@@ -43,7 +36,6 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	}
 
 	// Other variables
-	register double speedSign;
 	JamEntity* collEnemy = jamWorldEntityCollision(world, self, self->x, self->y);
 	collEnemy = (collEnemy != NULL && collEnemy->type == TYPE_ENEMY) ? collEnemy : NULL;
 	
@@ -165,6 +157,6 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 
 	// Draw the player health
 	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, 100, 16);
-	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, 0, 0, gPlayerHP, 16);
+	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, 0, 0, (int)(((double)gPlayerHP / (double)gMaxPlayerHP) * 100), 16);
 }
 ////////////////////////////////////////////////////////////
