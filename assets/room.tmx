@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="30" height="25" tilewidth="8" tileheight="8" infinite="0" nextlayerid="7" nextobjectid="3">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="30" height="25" tilewidth="8" tileheight="8" infinite="0" nextlayerid="7" nextobjectid="4">
  <tileset firstgid="1" name="DirtTilesetSprite" tilewidth="8" tileheight="8" tilecount="48" columns="48">
   <image source="dirttileset.png" width="384" height="8"/>
  </tileset>
@@ -36,8 +36,6 @@
 </data>
  </layer>
  <objectgroup id="5" name="Object Layer 1">
-  <object id="2" name="Player starting position" type="PlayerEntity" x="37.4545" y="114.182">
-   <point/>
-  </object>
+  <object id="3" name="player starting pos" type="PlayerEntity" x="34" y="115" width="8" height="12"/>
  </objectgroup>
 </map>

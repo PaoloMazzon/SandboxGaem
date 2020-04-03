@@ -71,7 +71,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		// Slower movement mid-air
 		double left = -jamInputCheckKey(JAM_KB_LEFT);
 		double right = jamInputCheckKey(JAM_KB_RIGHT);
-		self->hSpeed += (left + right) * 0.15 * jamRendererGetDelta();
+		self->hSpeed += (left + right) * 0.10 * jamRendererGetDelta();
 	}
 
 	// Restrict velocity
@@ -82,7 +82,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	// Jump
 	self->vSpeed += 0.5 * jamRendererGetDelta(); // Gravity
 	if (jamInputCheckKey(JAM_KB_UP) && jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
-		self->vSpeed = -9;
+		self->vSpeed = -6;
 	}
 
 	// Change sprites and direction facing before hspeed potentially gets zeroed during collisions
@@ -112,9 +112,12 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	self->y += self->vSpeed;
 
 	// Tween the camera position towards the player
-	jamRendererMoveCamera(
-			((self->x - GAME_WIDTH / 2) - jamRendererGetCameraX()) * 0.25,
-			(((self->y - GAME_HEIGHT / 2) - 50) - jamRendererGetCameraY()) * 0.25
+	double xx = jamRendererGetCameraX() + (((self->x - GAME_WIDTH / 2) - jamRendererGetCameraX()) * 0.25);
+	double yy = jamRendererGetCameraY() + ((((self->y - GAME_HEIGHT / 2) - 25) - jamRendererGetCameraY()) * 0.25);
+
+	jamRendererSetCameraPos(
+			xx < 0 ? 0 : xx,
+			yy
 	);
 
 	//////////////////////// Debug ////////////////////////
@@ -134,16 +137,6 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	if (sHealthBarTex == NULL)
 		sHealthBarTex = jamAssetHandlerGetTexture(gGameData, "PlayerHealthBarTexture");
 
-	/////////////////// DEBUG ///////////////////
-	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y)) {
-		jamDrawRectangleFilled(
-			(int)round(self->x + self->hitboxOffsetX),
-			(int)round(self->y + self->hitboxOffsetY),
-			(int)round(self->hitbox->width),
-			(int)round(self->hitbox->height)
-		);
-	}
-
 	if (gFlicker > 0)
 		gFlicker -= jamRendererGetDelta();
 	
@@ -156,7 +149,8 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 		jamDrawEntity(self);
 
 	// Draw the player health
-	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, 100, 16);
-	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, 0, 0, (int)(((double)gPlayerHP / (double)gMaxPlayerHP) * 100), 16);
+	uint32 size = 75;
+	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, size + 1, 16);
+	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, 0, 0, (int)(((double)gPlayerHP / (double)gMaxPlayerHP) * size), 16);
 }
 ////////////////////////////////////////////////////////////
