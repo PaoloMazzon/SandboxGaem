@@ -5,8 +5,9 @@
 #pragma once
 
 // Display constants
-#define GAME_WIDTH 480
-#define GAME_HEIGHT 320
+#define GAME_WIDTH 240
+#define GAME_HEIGHT 160
+#define DEFAULT_GAME_SCALE 3
 
 // Entity types
 #define TYPE_PLAYER 1

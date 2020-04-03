@@ -3,8 +3,6 @@
 #include <EntityBehaviour.h>
 #include <SandConstants.h>
 
-#define DEFAULT_GAME_SCALE 2
-
 // The global asset handler for the game
 JamAssetHandler* gGameData;
 
@@ -30,10 +28,6 @@ void runGame() {
 	// Game data
 	double camX;
 	double camY;
-
-	// Autotile the level
-	if (gameWorld != NULL)
-		jamTileMapAuto(gameWorld->worldMaps[0], jamAssetHandlerGetSprite(gGameData, "DirtTilesetSprite"));
     
 	while (jamRendererProcEvents() && !stopRunning && !jGetError()) {
 		// Double parallax background - 3 renders/background to cover all possible places
@@ -68,7 +62,7 @@ void runMenu() {
 }
 
 int main(int argc, const char* argv[]) {
-	jamRendererInit(&argc, (char**)argv, "Gaem", 480, 320, 60);
+	jamRendererInit(&argc, (char**)argv, "Gaem", GAME_WIDTH, GAME_HEIGHT, 60);
 	jamRendererReset(GAME_WIDTH * DEFAULT_GAME_SCALE, GAME_HEIGHT * DEFAULT_GAME_SCALE, false);
 	jamRendererIntegerScale();
 	jamRendererSetIcon("assets/icon.png");
