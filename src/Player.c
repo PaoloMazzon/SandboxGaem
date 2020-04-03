@@ -29,6 +29,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	static JamSprite* sPlayerWalkSprite = NULL;
 	static JamSprite* sPlayerStandSprite = NULL;
 	static JamSprite* sPlayerJumpSprite = NULL;
+	static bool sPlayerJumped = false;
 	static bool sInvincible = false;
 	if (sPlayerWalkSprite == NULL && sPlayerStandSprite == NULL && sPlayerJumpSprite == NULL) {
 		sPlayerWalkSprite = jamAssetHandlerGetSprite(gGameData, "PlayerMovingSprite");
@@ -84,15 +85,21 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	self->vSpeed += 0.5 * jamRendererGetDelta(); // Gravity
 	if (jamInputCheckKeyPressed(JAM_KB_UP) && jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
 		self->vSpeed = JUMP_VELOCITY;
+		sPlayerJumped = true;
 	}
 
 	// Change sprites and direction facing before hspeed potentially gets zeroed during collisions
-	if (!jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1))
+	if (!jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
 		self->sprite = sPlayerJumpSprite;
-	else if (self->hSpeed != 0)
+		if (sPlayerJumped)
+			self->rot += jamRendererGetDelta() * self->scaleX * JUMP_ROT_SPEED;
+	} else if (self->hSpeed != 0) {
 		self->sprite = sPlayerWalkSprite;
-	else
+		self->rot = 0;
+	} else {
 		self->sprite = sPlayerStandSprite;
+		self->rot = 0;
+	}
 	if (self->hSpeed > 0)
 		self->scaleX = 1;
 	else if (self->hSpeed < 0)
@@ -106,6 +113,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + self->vSpeed)) {
 		jamEntitySnapY(self, world->worldMaps[WORLD_WALL_LAYER], (int)sign(self->vSpeed));
 		self->vSpeed = 0;
+		sPlayerJumped = false;
 	}
 
 	// Update player position
@@ -133,13 +141,13 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	static bool flicker = false;
 	static uint64 timer = 0;
 	static JamTexture* sHealthBarTex = NULL;
-	static JamBitmapFont* sGameFont = NULL;
+	static JamFont* sGameFont = NULL;
 
 	// Initialize statics
 	if (sHealthBarTex == NULL)
 		sHealthBarTex = jamAssetHandlerGetTexture(gGameData, "PlayerHealthBarTexture");
 	if (sGameFont == NULL)
-		sGameFont = jamAssetHandlerGetBitmapFont(gGameData, "GameFont");
+		sGameFont = jamAssetHandlerGetFont(gGameData, "GameFont");
 
 	if (gFlicker > 0)
 		gFlicker -= jamRendererGetDelta();
@@ -156,6 +164,6 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	uint32 size = 75;
 	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, size, 12);
 	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, 0, 0, (int)(((double)gPlayerHP / (double)gMaxPlayerHP) * size), 12);
-	jamBitmapFontRenderExt(9, 10, "HP: %f", sGameFont, 100, (double)gPlayerHP);
+	jamFontRender(sGameFont, (int)round(jamRendererGetCameraX()) + 9, (int)round(jamRendererGetCameraY()) + 10, "HP: %f", round((double)gPlayerHP));
 }
 ////////////////////////////////////////////////////////////
