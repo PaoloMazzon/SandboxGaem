@@ -3,6 +3,7 @@
 #include <math.h>
 #include <Tweening.h>
 #include <SandConstants.h>
+#include <JamEngine.h>
 
 /////////////// Player Globals ///////////////
 extern JamAssetHandler* gGameData;
@@ -132,10 +133,13 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	static bool flicker = false;
 	static uint64 timer = 0;
 	static JamTexture* sHealthBarTex = NULL;
+	static JamBitmapFont* sGameFont = NULL;
 
 	// Initialize statics
 	if (sHealthBarTex == NULL)
 		sHealthBarTex = jamAssetHandlerGetTexture(gGameData, "PlayerHealthBarTexture");
+	if (sGameFont == NULL)
+		sGameFont = jamAssetHandlerGetBitmapFont(gGameData, "GameFont");
 
 	if (gFlicker > 0)
 		gFlicker -= jamRendererGetDelta();
@@ -152,5 +156,6 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	uint32 size = 75;
 	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, size, 12);
 	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, 0, 0, (int)(((double)gPlayerHP / (double)gMaxPlayerHP) * size), 12);
+	jamBitmapFontRenderExt(9, 10, "HP: %f", sGameFont, 100, (double)gPlayerHP);
 }
 ////////////////////////////////////////////////////////////

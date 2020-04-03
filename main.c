@@ -26,7 +26,7 @@ void runGame() {
 	gameWorld = jamAssetHandlerGetWorld(gGameData, "GameWorld");
 	background1Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer1Texture");
 	background2Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer2Texture");
-	debugFont = jamAssetHandlerGetFont(gGameData, "GameFont");
+	debugFont = jamAssetHandlerGetFont(gGameData, "DebugFont");
 
 	// Game data
 	double camX;
