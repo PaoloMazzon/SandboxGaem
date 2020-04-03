@@ -41,8 +41,9 @@ void runGame() {
 		jamDrawTexture(background1Tex, ((int)camX / (GAME_WIDTH * 4)) * GAME_WIDTH + (int)(camX * 0.75), (int)camY + 7);
 		jamDrawTexture(background1Tex, (((int)camX / (GAME_WIDTH * 4)) + 1) * GAME_WIDTH + (int)(camX * 0.75), (int)camY + 7);
 
-		// And the world tiles
-		jamDrawTileMap(gameWorld->worldMaps[0], 0, 0, 0, 0, 0, 0);
+		// Draw tiles
+		jamDrawTileMap(gameWorld->worldMaps[0], 0, 0, 0, 0, 0, 0); // Walls
+		jamDrawTileMap(gameWorld->worldMaps[1], 0, 0, 0, 0, 0, 0); // Foreground tiles
 
 		// Make escape exit the program
 		if (jamInputCheckKey(JAM_KB_ESCAPE))

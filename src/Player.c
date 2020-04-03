@@ -41,7 +41,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	
 	// Throw the player away from the enemy if colliding
 	if (collEnemy != NULL && gFlicker <= 0 && !sInvincible) {
-		self->hSpeed = sign(self->x - collEnemy->x) * 5;
+		self->hSpeed = sign(self->x - collEnemy->x) * KNOCKBACK_VELOCITY;
 		self->vSpeed = -5;
 		gFlicker = FLICKER_FRAMES;
 		gPlayerHP -= 10;
@@ -59,10 +59,10 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
 	    double left = -jamInputCheckKey(JAM_KB_LEFT);
 		double right = jamInputCheckKey(JAM_KB_RIGHT);
-		self->hSpeed += (left + right) * 0.25;
+		self->hSpeed += (left + right) * PLAYER_ACCELERATION;
 		if (left + right == 0) {
 			double old = sign(self->hSpeed);
-			self->hSpeed -= old * 0.25 * jamRendererGetDelta();
+			self->hSpeed -= old * COEFFICIENT_OF_FRICTION * jamRendererGetDelta();
 			if (old != sign(self->hSpeed))
 				self->hSpeed = 0;
 		}
@@ -71,7 +71,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		// Slower movement mid-air
 		double left = -jamInputCheckKey(JAM_KB_LEFT);
 		double right = jamInputCheckKey(JAM_KB_RIGHT);
-		self->hSpeed += (left + right) * 0.10 * jamRendererGetDelta();
+		self->hSpeed += (left + right) * GRAVITY_ACCELERATION * jamRendererGetDelta();
 	}
 
 	// Restrict velocity
@@ -81,8 +81,8 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 
 	// Jump
 	self->vSpeed += 0.5 * jamRendererGetDelta(); // Gravity
-	if (jamInputCheckKey(JAM_KB_UP) && jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
-		self->vSpeed = -6;
+	if (jamInputCheckKeyPressed(JAM_KB_UP) && jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
+		self->vSpeed = JUMP_VELOCITY;
 	}
 
 	// Change sprites and direction facing before hspeed potentially gets zeroed during collisions

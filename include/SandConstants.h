@@ -1,6 +1,4 @@
-//
-// Created by plo on 11/30/19.
-//
+// Constants used in gaem
 
 #pragma once
 
@@ -16,6 +14,11 @@
 // How many frames (in delta time) should the flicker last
 #define FLICKER_FRAMES 90
 
-// Maximum velocity of the player
+// Player physics, anytime velocity is mentioned it implies initial velocity
 #define MAXIMUM_PLAYER_WALK_VELOCITY 3
 #define MAXIMUM_PLAYER_RUN_VELOCITY 5
+#define COEFFICIENT_OF_FRICTION 0.35
+#define PLAYER_ACCELERATION 0.20
+#define GRAVITY_ACCELERATION 0.10
+#define KNOCKBACK_VELOCITY 5
+#define JUMP_VELOCITY (-6)
