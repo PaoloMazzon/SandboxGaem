@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <JamEngine.h>
 #include <EntityBehaviour.h>
+#include <math.h>
 #include <SandConstants.h>
 
 // The global asset handler for the game
@@ -16,6 +17,7 @@ void runGame() {
 	// Data handled by the asset handler (not our problem)
 	JamWorld* gameWorld;
 	JamTexture* background1Tex, *background2Tex;
+	JamFont* debugFont;
 	
 	// Load assets
 	jamBehaviourMapAdd(bMap, "PlayerBehaviour", onPlayerCreate, onPlayerDestroy, onPlayerFrame, onPlayerDraw);
@@ -24,6 +26,7 @@ void runGame() {
 	gameWorld = jamAssetHandlerGetWorld(gGameData, "GameWorld");
 	background1Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer1Texture");
 	background2Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer2Texture");
+	debugFont = jamAssetHandlerGetFont(gGameData, "GameFont");
 
 	// Game data
 	double camX;
@@ -42,8 +45,9 @@ void runGame() {
 		jamDrawTexture(background1Tex, (((int)camX / (GAME_WIDTH * 4)) + 1) * GAME_WIDTH + (int)(camX * 0.75), (int)camY + 7);
 
 		// Draw tiles
-		jamDrawTileMap(gameWorld->worldMaps[0], 0, 0, 0, 0, 0, 0); // Walls
-		jamDrawTileMap(gameWorld->worldMaps[1], 0, 0, 0, 0, 0, 0); // Foreground tiles
+		jamDrawTileMap(gameWorld->worldMaps[WORLD_BACKGROUND_LAYER], 0, 0, 0, 0, 0, 0);
+		jamDrawTileMap(gameWorld->worldMaps[WORLD_FOREGROUND_LAYER], 0, 0, 0, 0, 0, 0);
+		jamDrawTileMap(gameWorld->worldMaps[WORLD_WALL_LAYER], 0, 0, 0, 0, 0, 0);
 
 		// Make escape exit the program
 		if (jamInputCheckKey(JAM_KB_ESCAPE))
@@ -51,6 +55,17 @@ void runGame() {
 		
 		// Process the game frame
 		jamWorldProcFrame(gameWorld);
+		jamDrawTileMap(gameWorld->worldMaps[WORLD_FOREFRONT_LAYER], 0, 0, 0, 0, 0, 0);
+
+		// Debug
+		jamFontRender(
+				debugFont,
+				(int)round(jamRendererGetCameraX()) + GAME_WIDTH - jamFontWidth(debugFont, "FPS: 60"),
+				(int)round(jamRendererGetCameraY()) - 3,
+				"FPS: %f",
+				round(jamRendererGetFramerate())
+		);
+
 		jamRendererProcEndFrame();
 	}
 

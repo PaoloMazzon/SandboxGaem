@@ -56,7 +56,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	 *  6. Jumping simply shoots the player's velocity upwards
 	 *  7. Movement is handled first, then animations, then collisions
 	 */
-	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
+	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
 	    double left = -jamInputCheckKey(JAM_KB_LEFT);
 		double right = jamInputCheckKey(JAM_KB_RIGHT);
 		self->hSpeed += (left + right) * PLAYER_ACCELERATION;
@@ -81,12 +81,12 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 
 	// Jump
 	self->vSpeed += 0.5 * jamRendererGetDelta(); // Gravity
-	if (jamInputCheckKeyPressed(JAM_KB_UP) && jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1)) {
+	if (jamInputCheckKeyPressed(JAM_KB_UP) && jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
 		self->vSpeed = JUMP_VELOCITY;
 	}
 
 	// Change sprites and direction facing before hspeed potentially gets zeroed during collisions
-	if (!jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + 1))
+	if (!jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1))
 		self->sprite = sPlayerJumpSprite;
 	else if (self->hSpeed != 0)
 		self->sprite = sPlayerWalkSprite;
@@ -98,12 +98,12 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->scaleX = -1;
 
 	// Collisions
-	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x + self->hSpeed, self->y)) {
-		jamEntitySnapX(self, world->worldMaps[0], (int)sign(self->hSpeed));
+	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed, self->y)) {
+		jamEntitySnapX(self, world->worldMaps[WORLD_WALL_LAYER], (int)sign(self->hSpeed));
 		self->hSpeed = 0;
 	}
-	if (jamEntityTileMapCollision(self, world->worldMaps[0], self->x, self->y + self->vSpeed)) {
-		jamEntitySnapY(self, world->worldMaps[0], (int)sign(self->vSpeed));
+	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + self->vSpeed)) {
+		jamEntitySnapY(self, world->worldMaps[WORLD_WALL_LAYER], (int)sign(self->vSpeed));
 		self->vSpeed = 0;
 	}
 
@@ -150,7 +150,7 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 
 	// Draw the player health
 	uint32 size = 75;
-	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, size + 1, 16);
-	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 16, (int)round(jamRendererGetCameraY()) + 16, 0, 0, (int)(((double)gPlayerHP / (double)gMaxPlayerHP) * size), 16);
+	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, size, 12);
+	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, 0, 0, (int)(((double)gPlayerHP / (double)gMaxPlayerHP) * size), 12);
 }
 ////////////////////////////////////////////////////////////
