@@ -11,16 +11,29 @@ extern JamAssetHandler* gGameData;
 static double gFlicker; // This is to flicker when the player gets hit for x frames
 static int gPlayerHP = 100;
 static int gMaxPlayerHP = 100;
+static JamControlMap* gPlayerControls;
 
 ////////////////////////////////////////////////////////////
 void onPlayerCreate(JamWorld* world, JamEntity* self) {
-
+	gPlayerControls = jamControlMapCreate();
+	jamControlMapAddInput(gPlayerControls, "move", JAM_KB_RIGHT, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gPlayerControls, "move", JAM_KB_LEFT, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_ACTIVE, -1);
+	jamControlMapAddInput(gPlayerControls, "move", JAM_AXIS_LEFTX, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gPlayerControls, "move", JAM_BUTTON_DPAD_LEFT, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, -1);
+	jamControlMapAddInput(gPlayerControls, "move", JAM_BUTTON_DPAD_RIGHT, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gPlayerControls, "jump", JAM_KB_UP, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gPlayerControls, "jump", JAM_AXIS_LEFTY, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gPlayerControls, "jump", JAM_BUTTON_A, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gPlayerControls, "run", JAM_KB_Z, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gPlayerControls, "run", JAM_BUTTON_X, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gPlayerControls, "roll", JAM_KB_X, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gPlayerControls, "roll", JAM_BUTTON_B, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
 }
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
 void onPlayerDestroy(JamWorld* world, JamEntity* self) {
-    
+    jamControlMapFree(gPlayerControls);
 }
 ////////////////////////////////////////////////////////////
 
@@ -31,7 +44,11 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	static JamSprite* sPlayerStandSprite = NULL;
 	static JamSprite* sPlayerJumpSprite = NULL;
 	static bool sPlayerJumped = false;
+	static bool sPlayerRolling = false;
 	static bool sInvincible = false;
+	static double sRollCooldown = 0;
+	static double sRollDuration = 0;
+	bool standing = jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1);
 	if (sPlayerWalkSprite == NULL && sPlayerStandSprite == NULL && sPlayerJumpSprite == NULL) {
 		sPlayerWalkSprite = jamAssetHandlerGetSprite(gGameData, "PlayerMovingSprite");
 		sPlayerStandSprite = jamAssetHandlerGetSprite(gGameData, "PlayerStandingSprite");
@@ -59,45 +76,49 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	 *  6. Jumping simply shoots the player's velocity upwards
 	 *  7. Movement is handled first, then animations, then collisions
 	 */
-	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
-	    double left = -jamInputCheckKey(JAM_KB_LEFT);
-		double right = jamInputCheckKey(JAM_KB_RIGHT);
-		self->hSpeed += (left + right) * PLAYER_ACCELERATION;
-		if (left + right == 0) {
-			double old = sign(self->hSpeed);
-			self->hSpeed -= old * COEFFICIENT_OF_FRICTION * jamRendererGetDelta();
-			if (old != sign(self->hSpeed))
-				self->hSpeed = 0;
+	self->vSpeed += 0.5 * jamRendererGetDelta(); // Gravity
+	if (standing && !sPlayerRolling && sRollCooldown <= 0 && sRollDuration <= 0 && jamControlMapCheck(gPlayerControls, "roll")) {
+		sPlayerRolling = true;
+		self->hSpeed = ROLL_SPEED * self->scaleX;
+		sRollCooldown = ROLL_COOLDOWN;
+		sRollDuration = ROLL_DURATION;
+	} else {
+		sRollCooldown -= jamRendererGetDelta();
+		double movement = jamControlMapCheck(gPlayerControls, "move");
+		if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
+			self->hSpeed += movement * PLAYER_ACCELERATION;
+			if (movement == 0) {
+				double old = sign(self->hSpeed);
+				self->hSpeed -= old * COEFFICIENT_OF_FRICTION * jamRendererGetDelta();
+				if (old != sign(self->hSpeed))
+					self->hSpeed = 0;
+			}
+
+		} else {
+			// Slower movement mid-air
+			self->hSpeed += movement * GRAVITY_ACCELERATION * jamRendererGetDelta();
 		}
 
-	} else {
-		// Slower movement mid-air
-		double left = -jamInputCheckKey(JAM_KB_LEFT);
-		double right = jamInputCheckKey(JAM_KB_RIGHT);
-		self->hSpeed += (left + right) * GRAVITY_ACCELERATION * jamRendererGetDelta();
-	}
+		// Restrict velocity
+		double maxSpeed = jamControlMapCheck(gPlayerControls, "run") ? MAXIMUM_PLAYER_RUN_VELOCITY
+																	 : MAXIMUM_PLAYER_WALK_VELOCITY;
+		if (fabs(self->hSpeed) > maxSpeed)
+			self->hSpeed = sign(self->hSpeed) * maxSpeed;
 
-	// Restrict velocity
-	double maxSpeed = jamInputCheckKey(JAM_KB_Z) ? MAXIMUM_PLAYER_RUN_VELOCITY : MAXIMUM_PLAYER_WALK_VELOCITY;
- 	if (fabs(self->hSpeed) > maxSpeed)
-		self->hSpeed = sign(self->hSpeed) * maxSpeed;
-
-	// Jump
-	self->vSpeed += 0.5 * jamRendererGetDelta(); // Gravity
-	if (jamInputCheckKeyPressed(JAM_KB_UP) && jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
-		self->vSpeed = JUMP_VELOCITY;
-		sPlayerJumped = true;
+		// Jump
+		if (jamControlMapCheck(gPlayerControls, "jump") && standing) {
+			self->vSpeed = JUMP_VELOCITY;
+			sPlayerJumped = true;
+		}
 	}
 
 	// Change sprites and direction facing before hspeed potentially gets zeroed during collisions
-	if (!jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
+	if (!standing) {
 		self->sprite = sPlayerJumpSprite;
-		if (sPlayerJumped)
-			self->rot += jamRendererGetDelta() * self->scaleX * JUMP_ROT_SPEED;
-	} else if (self->hSpeed != 0) {
+	} else if (self->hSpeed != 0 && !sPlayerRolling) {
 		self->sprite = sPlayerWalkSprite;
 		self->rot = 0;
-	} else {
+	} else if (!sPlayerRolling) {
 		self->sprite = sPlayerStandSprite;
 		self->rot = 0;
 	}
@@ -105,6 +126,17 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->scaleX = 1;
 	else if (self->hSpeed < 0)
 		self->scaleX = -1;
+
+	// Spinning effects
+	if (sPlayerJumped)
+		self->rot += jamRendererGetDelta() * self->scaleX * JUMP_ROT_SPEED;
+	if (sPlayerRolling) {
+		self->rot += jamRendererGetDelta() * self->scaleX * ROLL_ROT_SPEED;
+		sRollDuration -= jamRendererGetDelta();
+		self->hSpeed = ROLL_SPEED * self->scaleX;
+		if (sRollDuration <= 0)
+			sPlayerRolling = false;
+	}
 
 
 	// Horizontally, we can go climb 1 block at a time without jumping if there is not a block above
@@ -119,6 +151,9 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed, self->y)) {
 		jamEntitySnapX(self, world->worldMaps[WORLD_WALL_LAYER], (int)sign(self->hSpeed));
 		self->hSpeed = 0;
+		sPlayerRolling = false;
+		sRollCooldown = 0;
+		sRollDuration = 0;
 	}
 	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + self->vSpeed)) {
 		jamEntitySnapY(self, world->worldMaps[WORLD_WALL_LAYER], (int)sign(self->vSpeed));
@@ -176,6 +211,6 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	uint32 size = 75;
 	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, size, 12);
 	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, 0, 0, (int)(((double)gPlayerHP / (double)gMaxPlayerHP) * size), 12);
-	jamFontRender(sGameFont, (int)round(jamRendererGetCameraX()) + 9, (int)round(jamRendererGetCameraY()) + 10, "HP: %f", round((double)gPlayerHP));
+	jamFontRender(sGameFont, (int)round(jamRendererGetCameraX()) + 9, (int)round(jamRendererGetCameraY()) + 10, "HP: %f%%", round((double)gPlayerHP));
 }
 ////////////////////////////////////////////////////////////
