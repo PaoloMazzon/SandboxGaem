@@ -20,14 +20,19 @@
 // How many frames (in delta time) should the flicker last
 #define FLICKER_FRAMES 90
 
+//////// Common Physics ////////
+#define FAST_SPEED 999
+#define KNOCKBACK_VELOCITY 5
+#define GRAVITY_ACCELERATION 0.50
+#define COEFFICIENT_OF_FRICTION 0.35
+#define AIR_VELOCITY_CONTROL 0.20
+#define COMICAL_GRAVITY_ACCELERATION 0.1
+
 // Player physics, anytime velocity is mentioned it implies initial velocity
 #define MAXIMUM_PLAYER_WALK_VELOCITY 2.5
 #define MAXIMUM_PLAYER_RUN_VELOCITY 3.5
-#define COEFFICIENT_OF_FRICTION 0.35
 #define PLAYER_ACCELERATION 0.20
-#define GRAVITY_ACCELERATION 0.10
-#define KNOCKBACK_VELOCITY 5
-#define JUMP_VELOCITY (-5.5)
+#define PLAYER_JUMP_VELOCITY (-5.5)
 #define ROLL_SPEED 4
 #define ROLL_COOLDOWN 5
 #define ROLL_ROT_SPEED 20

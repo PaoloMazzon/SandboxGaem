@@ -1,12 +1,11 @@
 #include "Player.h"
 #include <malloc.h>
 #include <math.h>
-#include <Tweening.h>
+#include <EntityCommon.h>
 #include <SandConstants.h>
 #include <JamEngine.h>
 #include <TileMap.h>
 #include <Enemies.h>
-#include "Enemies.h"
 
 /////////////// Player Globals ///////////////
 extern JamAssetHandler* gGameData;
@@ -50,6 +49,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	static bool sInvincible = false;
 	static double sRollCooldown = 0;
 	static double sRollDuration = 0;
+	bool hor, vert;
 	bool standing = jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1);
 	if (sPlayerWalkSprite == NULL && sPlayerStandSprite == NULL && sPlayerJumpSprite == NULL) {
 		sPlayerWalkSprite = jamAssetHandlerGetSprite(gGameData, "PlayerMovingSprite");
@@ -57,11 +57,11 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		sPlayerJumpSprite = jamAssetHandlerGetSprite(gGameData, "PlayerJumpingSprite");
 	}
 
-	// Other variables
+	///////////////// Enemy collisions /////////////////
 	JamEntity* collEnemy = jamWorldEntityCollision(world, self, self->x, self->y);
 	collEnemy = (collEnemy != NULL && collEnemy->type == TYPE_ENEMY) ? collEnemy : NULL;
 	
-	// Throw the player away from the enemy if colliding
+	// Throw the player away from the enemy if colliding or if rolling throw the enemy out
 	if (collEnemy != NULL && gFlicker <= 0 && !sPlayerRolling && !sInvincible
 			&& ((EnemyData*)collEnemy->data)->fadeOut == 0) {
 		self->hSpeed = sign(self->x - collEnemy->x) * KNOCKBACK_VELOCITY;
@@ -74,65 +74,37 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		collEnemy->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
 	}
 
-	/* Movement is frictional and somewhat realistic
-	 *  1. Friction is only applied while on the ground, movement mid-air is limited
-	 *  2. Pressing left/right controls acceleration, not velocity
-	 *  3. Friction is only applied if you're on the ground and not pressing left/right
-	 *  4. Movement speed is capped at MAXIMUM_PLAYER_VELOCITY
-	 *  5. Gravity is applied at all times
-	 *  6. Jumping simply shoots the player's velocity upwards
-	 *  7. Movement is handled first, then animations, then collisions
-	 */
-	self->vSpeed += 0.5 * jamRendererGetDelta(); // Gravity
+	// Rolling
 	if (standing && !sPlayerRolling && sRollCooldown <= 0 && sRollDuration <= 0 && jamControlMapCheck(gPlayerControls, "roll")) {
 		sPlayerRolling = true;
 		self->hSpeed = ROLL_SPEED * self->scaleX;
 		sRollCooldown = ROLL_COOLDOWN;
 		sRollDuration = ROLL_DURATION;
-	} else {
-		sRollCooldown -= jamRendererGetDelta();
-		double movement = jamControlMapCheck(gPlayerControls, "move");
-		if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
-			self->hSpeed += movement * PLAYER_ACCELERATION;
-			if (movement == 0) {
-				double old = sign(self->hSpeed);
-				self->hSpeed -= old * COEFFICIENT_OF_FRICTION * jamRendererGetDelta();
-				if (old != sign(self->hSpeed))
-					self->hSpeed = 0;
-			}
-
-		} else {
-			// Slower movement mid-air
-			self->hSpeed += movement * GRAVITY_ACCELERATION * jamRendererGetDelta();
-		}
-
-		// Restrict velocity
-		double maxSpeed = jamControlMapCheck(gPlayerControls, "run") ? MAXIMUM_PLAYER_RUN_VELOCITY
-																	 : MAXIMUM_PLAYER_WALK_VELOCITY;
-		if (fabs(self->hSpeed) > maxSpeed)
-			self->hSpeed = sign(self->hSpeed) * maxSpeed;
-
-		// Jump
-		if (jamControlMapCheck(gPlayerControls, "jump") && standing) {
-			self->vSpeed = JUMP_VELOCITY;
-			sPlayerJumped = true;
-		}
 	}
+	sRollCooldown -= jamRendererGetDelta();
 
-	// Change sprites and direction facing before hspeed potentially gets zeroed during collisions
-	if (!standing) {
-		self->sprite = sPlayerJumpSprite;
-	} else if (self->hSpeed != 0 && !sPlayerRolling) {
-		self->sprite = sPlayerWalkSprite;
-		self->rot = 0;
-	} else if (!sPlayerRolling) {
-		self->sprite = sPlayerStandSprite;
-		self->rot = 0;
-	}
-	if (self->hSpeed > 0)
-		self->scaleX = 1;
-	else if (self->hSpeed < 0)
-		self->scaleX = -1;
+	// Physics
+	sbProcessPhysics(
+			world,
+			self,
+			jamControlMapCheck(gPlayerControls, "jump") != 0,
+			jamControlMapCheck(gPlayerControls, "move"),
+			true,
+			PLAYER_ACCELERATION,
+			PLAYER_JUMP_VELOCITY,
+			(jamControlMapCheck(gPlayerControls, "run") ? MAXIMUM_PLAYER_RUN_VELOCITY
+														: MAXIMUM_PLAYER_WALK_VELOCITY),
+			&sPlayerJumped
+	);
+
+	sbProcessAnimations(
+			world,
+			self,
+			sPlayerWalkSprite,
+			sPlayerStandSprite,
+			sPlayerJumpSprite,
+			!sPlayerJumped && !sPlayerRolling
+	);
 
 	// Spinning effects
 	if (sPlayerJumped)
@@ -145,39 +117,26 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 			sPlayerRolling = false;
 	}
 
-
-	// Horizontally, we can go climb 1 block at a time without jumping if there is not a block above
-	// us and we are currently on the ground (to prevent ledge grabbing)
-	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed, self->y) &&
-			!jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed, self->y - 10) &&
-			jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
-		self->y -= BLOCK_SIZE + 1;
-	}
-
 	// Collisions
-	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed, self->y)) {
-		jamEntitySnapX(self, world->worldMaps[WORLD_WALL_LAYER], (int)sign(self->hSpeed));
-		self->hSpeed = 0;
+	sbProcessCollisions(world, self, &hor, &vert);
+	if (hor) {
 		sPlayerRolling = false;
 		sRollCooldown = 0;
 		sRollDuration = 0;
 	}
-	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + self->vSpeed)) {
-		jamEntitySnapY(self, world->worldMaps[WORLD_WALL_LAYER], (int)sign(self->vSpeed));
-		self->vSpeed = 0;
+	if (vert)
 		sPlayerJumped = false;
-	}
 
-	// Update player position
-	self->x += self->hSpeed;
-	self->y += self->vSpeed;
+	sbProcessMovement(world, self);
 
+	// Player can't horizontally walk out of the game world
 	self->x = clamp(self->x, 0, world->worldMaps[0]->width * world->worldMaps[0]->cellWidth);
 
 	// Tween the camera position towards the player
 	double xx = jamRendererGetCameraX() + (((self->x - GAME_WIDTH / 2) - jamRendererGetCameraX()) * 0.25);
 	double yy = jamRendererGetCameraY() + ((((self->y - GAME_HEIGHT / 2) - 25) - jamRendererGetCameraY()) * 0.25);
 
+	// The camera is clamped to only show the game world
 	jamRendererSetCameraPos(
 			clamp(xx, 0, world->worldMaps[0]->width * world->worldMaps[0]->cellWidth - GAME_WIDTH),
 			yy

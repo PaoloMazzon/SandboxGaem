@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <Enemies.h>
+#include <EntityCommon.h>
 
 extern JamAssetHandler* gGameData;
 
@@ -17,6 +18,7 @@ void onSkellyManDestroy(JamWorld* world, JamEntity* self) {
 void onSkellyManFrame(JamWorld* world, JamEntity* self) {
 	static JamSprite* sSkellyStand;
 	static JamSprite* sSkellyWalk;
+	bool horizontal;
 
 	// Load animations
 	if (sSkellyStand == NULL)
@@ -39,76 +41,37 @@ void onSkellyManFrame(JamWorld* world, JamEntity* self) {
 		}
 	}
 
-	// Fade out (death) trumps AI
-	if (((EnemyData*)self->data)->fadeOut != 0)
-		((EnemyData*)self->data)->movement = 0;
+	sbProcessPhysics(
+			world,
+			self,
+			false,
+			((EnemyData*)self->data)->fadeOut == 0 ? ((EnemyData*)self->data)->movement : 0,
+			!((EnemyData*)self->data)->fadeOut,
+			SKELLYMAN_ACCELERATION,
+			0,
+			((EnemyData*)self->data)->fadeOut == 0 ? SKELLYMAN_MAX_SPEED : FAST_SPEED,
+			NULL
+	);
 
-	// Gravity
-	self->vSpeed += GRAVITY_ACCELERATION;
-	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
-		self->hSpeed += ((EnemyData*)self->data)->movement * SKELLYMAN_ACCELERATION;
-		if (((EnemyData*)self->data)->movement == 0) {
-			double old = sign(self->hSpeed);
-			if (((EnemyData*)self->data)->fadeOut == 0)
-				self->hSpeed -= old * COEFFICIENT_OF_FRICTION * jamRendererGetDelta();
-			if (old != sign(self->hSpeed))
-				self->hSpeed = 0;
-		}
+	// Animations
+	sbProcessAnimations(world, self, sSkellyWalk, sSkellyStand, sSkellyStand, ((EnemyData*)self->data)->fadeOut == 0);
 
-	} else {
-		// Slower movement mid-air
-		self->hSpeed += ((EnemyData*)self->data)->movement * GRAVITY_ACCELERATION * jamRendererGetDelta();
-	}
-
-	if (((EnemyData*)self->data)->fadeOut == 0) {
-		if (fabs(self->hSpeed) > SKELLYMAN_MAX_SPEED)
-			self->hSpeed = sign(self->hSpeed) * SKELLYMAN_MAX_SPEED;
-
-		// Change sprites and direction facing before hspeed potentially gets zeroed during collisions
-		if (self->hSpeed != 0) {
-			self->sprite = sSkellyWalk;
-			self->rot = 0;
-		} else {
-			self->sprite = sSkellyStand;
-			self->rot = 0;
-		}
-		if (self->hSpeed > 0)
-			self->scaleX = 1;
-		else if (self->hSpeed < 0)
-			self->scaleX = -1;
-
-		// Horizontally, we can go climb 1 block at a time without jumping if there is not a block above
-		// us and we are currently on the ground (to prevent ledge grabbing)
-		if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed, self->y) &&
-			!jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed,
-									   self->y - 10) &&
-			jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
-			self->y -= BLOCK_SIZE + 1;
-		}
-
-		// Collisions
-		if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed, self->y)) {
-			jamEntitySnapX(self, world->worldMaps[WORLD_WALL_LAYER], (int) sign(self->hSpeed));
-			self->hSpeed = 0;
-
-			if (((EnemyData *) self->data)->movement != 0)
-				((EnemyData *) self->data)->movement = ((EnemyData *) self->data)->movement == 1 ? -1 : 1;
-		}
-		if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + self->vSpeed)) {
-			jamEntitySnapY(self, world->worldMaps[WORLD_WALL_LAYER], (int) sign(self->vSpeed));
-			self->vSpeed = 0;
-		}
-	} else {
+	// Either death or collisions
+	if (((EnemyData *) self->data)->fadeOut != 0) {
 		self->rot += ENEMY_DEATH_ROT_SPEED;
-		self->alpha = (uint8)(((EnemyData*)self->data)->fadeOut / ENEMY_FADE_OUT_TIME * 255);
+		self->vSpeed += COMICAL_GRAVITY_ACCELERATION - GRAVITY_ACCELERATION;
+		self->alpha = (uint8) (((EnemyData *) self->data)->fadeOut / ENEMY_FADE_OUT_TIME * 255);
 		((EnemyData *) self->data)->fadeOut -= jamRendererGetDelta();
 		if (((EnemyData *) self->data)->fadeOut <= 0) {
 			jamWorldRemoveEntity(world, self->id);
 		}
+	} else {
+		sbProcessCollisions(world, self, &horizontal, NULL);
+		if (horizontal && ((EnemyData *) self->data)->movement != 0)
+			((EnemyData *) self->data)->movement = ((EnemyData *) self->data)->movement == 1 ? -1 : 1;
 	}
 
-	self->x += self->hSpeed;
-	self->y += self->vSpeed;
+	sbProcessMovement(world, self);
 }
 
 void onSkellyManDraw(JamWorld* world, JamEntity* self) {

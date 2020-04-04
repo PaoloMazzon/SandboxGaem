@@ -82,6 +82,9 @@
 		<Unit filename="/home/plo/code/sandboxgaem/include/EntityBehaviour.h">
 			<Option target="SideScrollerSandbox"/>
 		</Unit>
+		<Unit filename="/home/plo/code/sandboxgaem/include/EntityCommon.h">
+			<Option target="SideScrollerSandbox"/>
+		</Unit>
 		<Unit filename="/home/plo/code/sandboxgaem/include/Player.h">
 			<Option target="SideScrollerSandbox"/>
 		</Unit>
@@ -92,6 +95,9 @@
 			<Option target="SideScrollerSandbox"/>
 		</Unit>
 		<Unit filename="/home/plo/code/sandboxgaem/src/EnemyCommon.c">
+			<Option target="SideScrollerSandbox"/>
+		</Unit>
+		<Unit filename="/home/plo/code/sandboxgaem/src/EntityCommon.c">
 			<Option target="SideScrollerSandbox"/>
 		</Unit>
 		<Unit filename="/home/plo/code/sandboxgaem/src/Player.c">
