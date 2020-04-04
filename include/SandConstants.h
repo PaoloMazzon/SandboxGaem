@@ -32,3 +32,14 @@
 #define ROLL_COOLDOWN 5
 #define ROLL_ROT_SPEED 20
 #define ROLL_DURATION 17
+
+////////// Enemy physics //////////
+#define ENEMY_FADE_OUT_TIME (60 * 1)
+#define ENEMY_DEATH_ROT_SPEED 14
+#define ENEMY_KNOCKBACK_VELOCITY 2
+
+// Skellymen
+#define SKELLYMAN_MAX_SPEED 0.5
+#define SKELLYMAN_ACCELERATION 0.05
+#define SKELLYMAN_PAUSE_INTERVAL (60 * 3)
+#define SKELLYMAN_WALK_INTERVAL (60 * 2)

@@ -76,16 +76,28 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/plo/code/sandboxgaem/include/Enemies.h">
+			<Option target="SideScrollerSandbox"/>
+		</Unit>
+		<Unit filename="/home/plo/code/sandboxgaem/include/EntityBehaviour.h">
+			<Option target="SideScrollerSandbox"/>
+		</Unit>
+		<Unit filename="/home/plo/code/sandboxgaem/include/Player.h">
+			<Option target="SideScrollerSandbox"/>
+		</Unit>
 		<Unit filename="/home/plo/code/sandboxgaem/include/SandConstants.h">
 			<Option target="SideScrollerSandbox"/>
 		</Unit>
 		<Unit filename="/home/plo/code/sandboxgaem/main.c">
 			<Option target="SideScrollerSandbox"/>
 		</Unit>
-		<Unit filename="/home/plo/code/sandboxgaem/src/BasicEnemy.c">
+		<Unit filename="/home/plo/code/sandboxgaem/src/EnemyCommon.c">
 			<Option target="SideScrollerSandbox"/>
 		</Unit>
 		<Unit filename="/home/plo/code/sandboxgaem/src/Player.c">
+			<Option target="SideScrollerSandbox"/>
+		</Unit>
+		<Unit filename="/home/plo/code/sandboxgaem/src/SkellyMan.c">
 			<Option target="SideScrollerSandbox"/>
 		</Unit>
 		<Unit filename="/home/plo/code/sandboxgaem/CMakeLists.txt">

@@ -22,7 +22,7 @@ void runGame(bool debug) {
 	
 	// Load assets
 	jamBehaviourMapAdd(bMap, "PlayerBehaviour", onPlayerCreate, onPlayerDestroy, onPlayerFrame, onPlayerDraw);
-	jamBehaviourMapAdd(bMap, "BasicEnemyBehaviour", onBEnemyCreate, onBEnemyDestroy, onBEnemyFrame, onBEnemyDraw);
+	jamBehaviourMapAdd(bMap, "SkellyManBehaviour", onSkellyManCreate, onSkellyManDestroy, onSkellyManFrame, onSkellyManDraw);
 	jamAssetHandlerLoadINI(gGameData, "assets/game.ini", bMap);
 	gameWorld = jamAssetHandlerGetWorld(gGameData, "GameWorld");
 	background1Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer1Texture");
@@ -65,10 +65,6 @@ void runGame(bool debug) {
 		jamDrawTileMap(gameWorld->worldMaps[WORLD_BACKGROUND_LAYER], 0, 0, 0, 0, 0, 0);
 		jamDrawTileMap(gameWorld->worldMaps[WORLD_FOREGROUND_LAYER], 0, 0, 0, 0, 0, 0);
 		jamDrawTileMap(gameWorld->worldMaps[WORLD_WALL_LAYER], 0, 0, 0, 0, 0, 0);
-
-		// Make escape exit the program
-		if (jamInputCheckKey(JAM_KB_ESCAPE))
-			stopRunning = true;
 		
 		// Process the game frame
 		jamWorldProcFrame(gameWorld);

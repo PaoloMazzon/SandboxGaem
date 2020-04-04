@@ -1,7 +1,19 @@
 #include <JamEngine.h>
 #pragma once
 
-void onBEnemyCreate(JamWorld* world, JamEntity* self);
-void onBEnemyDestroy(JamWorld* world, JamEntity* self);
-void onBEnemyFrame(JamWorld* world, JamEntity* self);
-void onBEnemyDraw(JamWorld* world, JamEntity* self);
+typedef struct {
+	double moveTime;
+	double pauseTime;
+	double movement;
+	double fadeOut;
+	double power;
+} EnemyData;
+
+// Common
+EnemyData* sbCreateEnemyData(double power);
+
+// Skellymen
+void onSkellyManCreate(JamWorld* world, JamEntity* self);
+void onSkellyManDestroy(JamWorld* world, JamEntity* self);
+void onSkellyManFrame(JamWorld* world, JamEntity* self);
+void onSkellyManDraw(JamWorld* world, JamEntity* self);

@@ -5,6 +5,8 @@
 #include <SandConstants.h>
 #include <JamEngine.h>
 #include <TileMap.h>
+#include <Enemies.h>
+#include "Enemies.h"
 
 /////////////// Player Globals ///////////////
 extern JamAssetHandler* gGameData;
@@ -60,11 +62,16 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	collEnemy = (collEnemy != NULL && collEnemy->type == TYPE_ENEMY) ? collEnemy : NULL;
 	
 	// Throw the player away from the enemy if colliding
-	if (collEnemy != NULL && gFlicker <= 0 && !sInvincible) {
+	if (collEnemy != NULL && gFlicker <= 0 && !sPlayerRolling && !sInvincible
+			&& ((EnemyData*)collEnemy->data)->fadeOut == 0) {
 		self->hSpeed = sign(self->x - collEnemy->x) * KNOCKBACK_VELOCITY;
-		self->vSpeed = -5;
+		self->vSpeed = -KNOCKBACK_VELOCITY;
 		gFlicker = FLICKER_FRAMES;
-		gPlayerHP -= 10;
+		gPlayerHP -= ((EnemyData*)collEnemy->data)->power;
+	} else if (collEnemy != NULL && sPlayerRolling) {
+		((EnemyData*)collEnemy->data)->fadeOut = ENEMY_FADE_OUT_TIME;
+		collEnemy->hSpeed = ENEMY_KNOCKBACK_VELOCITY * self->scaleX;
+		collEnemy->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
 	}
 
 	/* Movement is frictional and somewhat realistic
