@@ -4,6 +4,7 @@
 #include <Tweening.h>
 #include <SandConstants.h>
 #include <JamEngine.h>
+#include <TileMap.h>
 
 /////////////// Player Globals ///////////////
 extern JamAssetHandler* gGameData;
@@ -129,12 +130,14 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	self->x += self->hSpeed;
 	self->y += self->vSpeed;
 
+	self->x = clamp(self->x, 0, world->worldMaps[0]->width * world->worldMaps[0]->cellWidth);
+
 	// Tween the camera position towards the player
 	double xx = jamRendererGetCameraX() + (((self->x - GAME_WIDTH / 2) - jamRendererGetCameraX()) * 0.25);
 	double yy = jamRendererGetCameraY() + ((((self->y - GAME_HEIGHT / 2) - 25) - jamRendererGetCameraY()) * 0.25);
 
 	jamRendererSetCameraPos(
-			xx < 0 ? 0 : xx,
+			clamp(xx, 0, world->worldMaps[0]->width * world->worldMaps[0]->cellWidth - GAME_WIDTH),
 			yy
 	);
 

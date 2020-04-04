@@ -3,11 +3,12 @@
 #include <EntityBehaviour.h>
 #include <math.h>
 #include <SandConstants.h>
+#include <string.h>
 
 // The global asset handler for the game
 JamAssetHandler* gGameData;
 
-void runGame() {
+void runGame(bool debug) {
 	bool stopRunning = false;
 
 	// Data we're allocating and need to free
@@ -16,7 +17,7 @@ void runGame() {
 	
 	// Data handled by the asset handler (not our problem)
 	JamWorld* gameWorld;
-	JamTexture* background1Tex, *background2Tex, *skyTex;
+	JamTexture* background1Tex, *background2Tex, *background3Tex, *skyTex;
 	JamFont* debugFont;
 	
 	// Load assets
@@ -26,6 +27,7 @@ void runGame() {
 	gameWorld = jamAssetHandlerGetWorld(gGameData, "GameWorld");
 	background1Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer1Texture");
 	background2Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer2Texture");
+	background3Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer3Texture");
 	skyTex = jamAssetHandlerGetTexture(gGameData, "SkyTexture");
 	debugFont = jamAssetHandlerGetFont(gGameData, "DebugFont");
 
@@ -34,19 +36,30 @@ void runGame() {
 	double camY;
     
 	while (jamRendererProcEvents() && !stopRunning && !jGetError()) {
-		// Draw the background
+		// Sky texture
 		jamDrawTexture(skyTex, (int)round(jamRendererGetCameraX()), (int)round(jamRendererGetCameraY()));
-		camX = jamRendererGetCameraX() * 0.80;
+
+		// Back-most mountain
 		camY = jamRendererGetCameraY() + 30;
+		camX = (jamRendererGetCameraX() - 15) * 0.80;
 		while (camX < jamRendererGetCameraX() - GAME_WIDTH)
 			camX += GAME_WIDTH;
-		jamDrawTexture(background2Tex, (int)round(camX), (int)round(camY));
-		jamDrawTexture(background2Tex, (int)round(camX + GAME_WIDTH), (int)round(camY));
-		camX = jamRendererGetCameraX() * 0.65;
+		jamDrawTexture(background3Tex, (int)floor(camX), (int)round(camY) - 20);
+		jamDrawTexture(background3Tex, (int)floor(camX + GAME_WIDTH), (int)round(camY) - 20);
+
+		// Middle mountain
+		camX = jamRendererGetCameraX() * 0.70;
 		while (camX < jamRendererGetCameraX() - GAME_WIDTH)
 			camX += GAME_WIDTH;
-		jamDrawTexture(background1Tex, (int)round(camX), (int)round(camY));
-		jamDrawTexture(background1Tex, (int)round(camX + GAME_WIDTH), (int)round(camY));
+		jamDrawTexture(background2Tex, (int)floor(camX), (int)round(camY));
+		jamDrawTexture(background2Tex, (int)floor(camX + GAME_WIDTH), (int)round(camY));
+
+		// Front mountain
+		camX = jamRendererGetCameraX() * 0.60;
+		while (camX < jamRendererGetCameraX() - GAME_WIDTH)
+			camX += GAME_WIDTH;
+		jamDrawTexture(background1Tex, (int)floor(camX), (int)round(camY));
+		jamDrawTexture(background1Tex, (int)floor(camX + GAME_WIDTH), (int)round(camY));
 
 		// Draw tiles
 		jamDrawTileMap(gameWorld->worldMaps[WORLD_BACKGROUND_LAYER], 0, 0, 0, 0, 0, 0);
@@ -62,13 +75,15 @@ void runGame() {
 		jamDrawTileMap(gameWorld->worldMaps[WORLD_FOREFRONT_LAYER], 0, 0, 0, 0, 0, 0);
 
 		// Debug
-		jamFontRender(
-				debugFont,
-				(int)round(jamRendererGetCameraX()) + GAME_WIDTH - jamFontWidth(debugFont, "FPS: 60"),
-				(int)round(jamRendererGetCameraY()) - 3,
-				"FPS: %f",
-				round(jamRendererGetFramerate())
-		);
+		if (debug) {
+			jamFontRender(
+					debugFont,
+					(int) round(jamRendererGetCameraX()) + GAME_WIDTH - jamFontWidth(debugFont, "FPS: 60"),
+					(int) round(jamRendererGetCameraY()) - 3,
+					"FPS: %f",
+					round(jamRendererGetFramerate())
+			);
+		}
 
 		jamRendererProcEndFrame();
 	}
@@ -77,16 +92,21 @@ void runGame() {
 	jamBehaviourMapFree(bMap);
 }
 
-void runMenu() {
-	runGame();
+void runMenu(bool debug) {
+	runGame(debug);
 }
 
 int main(int argc, const char* argv[]) {
+	bool debug = false;
+
+	if (argc > 1 && strcmp(argv[1], "--debug") == 0)
+		debug = true;
+
 	jamRendererInit(&argc, (char**)argv, "Gaem", GAME_WIDTH, GAME_HEIGHT, 60);
 	jamRendererReset(GAME_WIDTH * DEFAULT_GAME_SCALE, GAME_HEIGHT * DEFAULT_GAME_SCALE, false);
 	jamRendererIntegerScale();
 	jamRendererSetIcon("assets/icon.png");
-	runMenu();
+	runMenu(debug);
 	jamRendererQuit();
 	return 0;
 }
