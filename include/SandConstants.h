@@ -5,12 +5,13 @@
 // Display constants
 #define GAME_WIDTH 240
 #define GAME_HEIGHT 160
-#define DEFAULT_GAME_SCALE 1
+#define DEFAULT_GAME_SCALE 3
 #define WORLD_BACKGROUND_LAYER 0
 #define WORLD_FOREGROUND_LAYER 1
 #define WORLD_WALL_LAYER 2
 #define WORLD_FOREFRONT_LAYER 3
 #define JUMP_ROT_SPEED 15
+#define BLOCK_SIZE 8
 
 // Entity types
 #define TYPE_PLAYER 1

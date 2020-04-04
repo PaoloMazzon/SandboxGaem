@@ -16,7 +16,7 @@ void runGame() {
 	
 	// Data handled by the asset handler (not our problem)
 	JamWorld* gameWorld;
-	JamTexture* background1Tex, *background2Tex;
+	JamTexture* background1Tex, *background2Tex, *skyTex;
 	JamFont* debugFont;
 	
 	// Load assets
@@ -26,6 +26,7 @@ void runGame() {
 	gameWorld = jamAssetHandlerGetWorld(gGameData, "GameWorld");
 	background1Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer1Texture");
 	background2Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer2Texture");
+	skyTex = jamAssetHandlerGetTexture(gGameData, "SkyTexture");
 	debugFont = jamAssetHandlerGetFont(gGameData, "DebugFont");
 
 	// Game data
@@ -33,16 +34,19 @@ void runGame() {
 	double camY;
     
 	while (jamRendererProcEvents() && !stopRunning && !jGetError()) {
-		// Double parallax background - 3 renders/background to cover all possible places
-		camX = jamRendererGetCameraX();
-		camY = jamRendererGetCameraY();
-		jamDrawFillColour(0, 150, 255, 255);
-		jamDrawTexture(background2Tex, (((int)camX / (GAME_WIDTH * 10)) - 1) * GAME_WIDTH + (int)(camX * 0.9), (int)camY);
-		jamDrawTexture(background2Tex, ((int)camX / (GAME_WIDTH * 10)) * GAME_WIDTH + (int)(camX * 0.9), (int)camY);
-		jamDrawTexture(background2Tex, (((int)camX / (GAME_WIDTH * 10)) + 1) * GAME_WIDTH + (int)(camX * 0.9), (int)camY);
-		jamDrawTexture(background1Tex, (((int)camX / (GAME_WIDTH * 4)) - 1) * GAME_WIDTH + (int)(camX * 0.75), (int)camY + 7);
-		jamDrawTexture(background1Tex, ((int)camX / (GAME_WIDTH * 4)) * GAME_WIDTH + (int)(camX * 0.75), (int)camY + 7);
-		jamDrawTexture(background1Tex, (((int)camX / (GAME_WIDTH * 4)) + 1) * GAME_WIDTH + (int)(camX * 0.75), (int)camY + 7);
+		// Draw the background
+		jamDrawTexture(skyTex, (int)round(jamRendererGetCameraX()), (int)round(jamRendererGetCameraY()));
+		camX = jamRendererGetCameraX() * 0.80;
+		camY = jamRendererGetCameraY() + 30;
+		while (camX < jamRendererGetCameraX() - GAME_WIDTH)
+			camX += GAME_WIDTH;
+		jamDrawTexture(background2Tex, (int)round(camX), (int)round(camY));
+		jamDrawTexture(background2Tex, (int)round(camX + GAME_WIDTH), (int)round(camY));
+		camX = jamRendererGetCameraX() * 0.65;
+		while (camX < jamRendererGetCameraX() - GAME_WIDTH)
+			camX += GAME_WIDTH;
+		jamDrawTexture(background1Tex, (int)round(camX), (int)round(camY));
+		jamDrawTexture(background1Tex, (int)round(camX + GAME_WIDTH), (int)round(camY));
 
 		// Draw tiles
 		jamDrawTileMap(gameWorld->worldMaps[WORLD_BACKGROUND_LAYER], 0, 0, 0, 0, 0, 0);

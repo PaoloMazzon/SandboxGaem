@@ -105,6 +105,15 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	else if (self->hSpeed < 0)
 		self->scaleX = -1;
 
+
+	// Horizontally, we can go climb 1 block at a time without jumping if there is not a block above
+	// us and we are currently on the ground (to prevent ledge grabbing)
+	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed, self->y) &&
+			!jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed, self->y - 10) &&
+			jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
+		self->y -= BLOCK_SIZE + 1;
+	}
+
 	// Collisions
 	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x + self->hSpeed, self->y)) {
 		jamEntitySnapX(self, world->worldMaps[WORLD_WALL_LAYER], (int)sign(self->hSpeed));
