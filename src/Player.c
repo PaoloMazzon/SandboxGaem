@@ -21,12 +21,12 @@ void onPlayerCreate(JamWorld* world, JamEntity* self) {
 								  "Who compared to none but his flooring\n"
 								  "He decided one day\n"
 								  "To throw it all away\n"
-								  "And set out into the wild exploring", ID_NOT_ASSIGNED);
+								  "And set out into the wild exploring", self->id);
 	sbQueueMessage(NARRATOR_NAME, "While his ignorance is naught but endless\n"
 								  "And he is caught in a rut that is friendless\n"
 								  "His grit was unmatched\n"
 								  "And his chain unlatched\n"
-								  "He thought himself a legend, deathless", ID_NOT_ASSIGNED);
+								  "He thought himself a legend, deathless", self->id);
 }
 ////////////////////////////////////////////////////////////
 
@@ -73,7 +73,8 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	}
 
 	// Rolling
-	if (standing && !sPlayerRolling && sRollCooldown <= 0 && sRollDuration <= 0 && jamControlMapCheck(gControlMap, "roll")) {
+	if (standing && !sPlayerRolling && sRollCooldown <= 0 && sRollDuration <= 0 &&
+			(!sbMessageActive() ? jamControlMapCheck(gControlMap, "roll") : false)) {
 		sPlayerRolling = true;
 		self->hSpeed = ROLL_SPEED * self->scaleX;
 		sRollCooldown = ROLL_COOLDOWN;
@@ -85,13 +86,13 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	sbProcCharacterPhysics(
 			world,
 			self,
-			jamControlMapCheck(gControlMap, "jump") != 0,
-			jamControlMapCheck(gControlMap, "move"),
+			!sbMessageActive() ? jamControlMapCheck(gControlMap, "jump") != 0 : false,
+			!sbMessageActive() ? jamControlMapCheck(gControlMap, "move") : 0,
 			true,
 			PLAYER_ACCELERATION,
 			PLAYER_JUMP_VELOCITY,
 			(jamControlMapCheck(gControlMap, "run") ? MAXIMUM_PLAYER_RUN_VELOCITY
-														: MAXIMUM_PLAYER_WALK_VELOCITY),
+													: MAXIMUM_PLAYER_WALK_VELOCITY),
 			&sPlayerJumped
 	);
 
@@ -132,7 +133,12 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 
 	// Tween the camera position towards the player
 	double xx = jamRendererGetCameraX() + (((self->x - GAME_WIDTH / 2) - jamRendererGetCameraX()) * 0.25);
-	double yy = jamRendererGetCameraY() + ((((self->y - GAME_HEIGHT / 2) - 25) - jamRendererGetCameraY()) * 0.25);
+	double yy;
+
+	if (sbMessageActive())
+		yy = jamRendererGetCameraY() + ((((self->y + 32 - GAME_HEIGHT / 2) - 25) - jamRendererGetCameraY()) * 0.25);
+	else
+		yy = jamRendererGetCameraY() + ((((self->y - GAME_HEIGHT / 2) - 25) - jamRendererGetCameraY()) * 0.25);
 
 	// The camera is clamped to only show the game world
 	jamRendererSetCameraPos(
