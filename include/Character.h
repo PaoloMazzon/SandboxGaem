@@ -7,57 +7,54 @@ typedef struct {
 	double movement;  ///< Which direction to move in
 	double fadeOut;   ///< Death fade out timer
 	double power;     ///< Damage this enemy deals to the player
-} EnemyData;
+} CharacterData;
 
 //////////////////// Common Data ////////////////////
 
-/// \brief Creates enemy data
-EnemyData* sbCreateEnemyData(double power);
-
 /// \brief Processes an enemy's death animation should he be dead, returning weather or not to process collisions
-bool sbProcessEnemyDeath(JamWorld* world, JamEntity* enemy);
+bool sbProcessCharacterDeath(JamWorld *world, JamEntity *enemy);
 
 /// \brief Gets the moveTime from an entity
-double sbGetEnemyMoveTime(JamEntity* enemy);
+double sbGetCharacterMoveTime(JamEntity *enemy);
 
 /// \brief Sets the moveTime of an entity
-void sbSetEnemyMoveTime(JamEntity* enemy, double moveTime);
+void sbSetCharacterMoveTime(JamEntity *enemy, double moveTime);
 
 /// \brief Subtracts the delta from MoveTime
-void sbTickEnemyMoveTime(JamEntity* enemy);
+void sbTickCharacterMoveTime(JamEntity *enemy);
 
 /// \brief Gets the pauseTime from an entity
-double sbGetEnemyPauseTime(JamEntity* enemy);
+double sbGetCharacterPauseTime(JamEntity *enemy);
 
 /// \brief Sets the pauseTime of an entity
-void sbSetEnemyPauseTime(JamEntity* enemy, double pauseTime);
+void sbSetCharacterPauseTime(JamEntity *enemy, double pauseTime);
 
 /// \brief Subtracts the delta from PauseTime
-void sbTickEnemyPauseTime(JamEntity* enemy);
+void sbTickCharacterPauseTime(JamEntity *enemy);
 
 /// \brief Gets the movement from an entity
-double sbGetEnemyMovement(JamEntity* enemy);
+double sbGetCharacterMovement(JamEntity *enemy);
 
 /// \brief Sets the movement of an entity
-void sbSetEnemyMovement(JamEntity* enemy, double movement);
+void sbSetCharacterMovement(JamEntity *enemy, double movement);
 
 /// \brief Gets the fadeOut from an entity
-double sbGetEnemyFadeOut(JamEntity* enemy);
+double sbGetCharacterFadeOut(JamEntity *enemy);
 
 /// \brief Checks if an enemy is dead (fade out has begun)
-bool sbGetEnemyDead(JamEntity* enemy);
+bool sbGetCharacterDead(JamEntity *enemy);
 
 /// \brief Sets the fadeOut of an entity
-void sbSetEnemyFadeOut(JamEntity* enemy, double fadeOut);
+void sbSetCharacterFadeOut(JamEntity *enemy, double fadeOut);
 
 /// \brief Subtracts the delta from fade out
-void sbTickEnemyFadeOut(JamEntity* enemy);
+void sbTickCharacterFadeOut(JamEntity *enemy);
 
 /// \brief Gets the power from an entity
-double sbGetEnemyPower(JamEntity* enemy);
+double sbGetCharacterPower(JamEntity *enemy);
 
 /// \brief Sets the power of an entity
-void sbSetEnemyPower(JamEntity* enemy, double power);
+void sbSetCharacterPower(JamEntity *enemy, double power);
 
 /// \brief Processes an entity's general physics but collisions are done with sbProcessCollisions
 /// \param world World the entity is in
@@ -69,7 +66,8 @@ void sbSetEnemyPower(JamEntity* enemy, double power);
 /// \param jumpSpeed Vertical lift when jumping
 /// \param maxVelocity The maximum horizontal velocity of this entity
 /// \param jumped Optional value set to weather or not the entity successfully jumped
-void sbProcessPhysics(JamWorld* world, JamEntity* self, bool jump, double movement, bool friction, double acceleration, double jumpSpeed, double maxVelocity, bool *jumped);
+void sbProcCharacterPhysics(JamWorld *world, JamEntity *self, bool jump, double movement, bool friction,
+							double acceleration, double jumpSpeed, double maxVelocity, bool *jumped);
 
 /// \brief Processes an entity's animations
 /// \param world World the entity is in
@@ -78,7 +76,8 @@ void sbProcessPhysics(JamWorld* world, JamEntity* self, bool jump, double moveme
 /// \param standing Sprite it uses when standing
 /// \param jumping Sprite it uses while mid-air
 /// \param stopRot Weather or not to set rotation to 0 while on the ground
-void sbProcessAnimations(JamWorld* world, JamEntity* self, JamSprite* walking, JamSprite* standing, JamSprite* jumping, bool stopRot);
+void sbProcCharacterAnimations(JamWorld *world, JamEntity *self, JamSprite *walking, JamSprite *standing,
+							   JamSprite *jumping, bool stopRot);
 
 /// \brief Processes an entity's collisions with the game world
 /// \param world World the entity is in
@@ -88,14 +87,20 @@ void sbProcessAnimations(JamWorld* world, JamEntity* self, JamSprite* walking, J
 ///
 /// You can leave horizontal and vertical as NULL if you don't need to know when
 /// collisions happen.
-void sbProcessCollisions(JamWorld* world, JamEntity* self, bool *horizontal, bool *vertical);
+void sbProcCharacterCollisions(JamWorld *world, JamEntity *self, bool *horizontal, bool *vertical);
 
 /// \brief Moves an entity the amount they are expected to
 /// \param world World the entity is in
 /// \param self Entity that is to be processed
-void sbProcessMovement(JamWorld* world, JamEntity* self);
+void sbProcCharacterMovement(JamWorld *world, JamEntity *self);
 
 //////////////////// Characters ////////////////////
+
+// Common - every character needs to either have these as their behaviour or
+// call them in their behaviour functions (ideally as the first thing called
+// in the create function and the last thing called in the destroy function).
+void onCharacterCreate(JamWorld* world, JamEntity* self);
+void onCharacterDestroy(JamWorld* world, JamEntity* self);
 
 // Player
 void onPlayerCreate(JamWorld* world, JamEntity* self);

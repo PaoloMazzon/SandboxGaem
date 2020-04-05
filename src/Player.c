@@ -57,17 +57,17 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 
 	///////////////// Enemy collisions /////////////////
 	JamEntity* collEnemy = jamWorldEntityCollision(world, self, self->x, self->y);
-	collEnemy = (collEnemy != NULL && collEnemy->type == TYPE_ENEMY) ? collEnemy : NULL;
+	collEnemy = (collEnemy != NULL && IS_TYPE_ENEMY(collEnemy->type)) ? collEnemy : NULL;
 	
 	// Throw the player away from the enemy if colliding or if rolling throw the enemy out
 	if (collEnemy != NULL && gFlicker <= 0 && !sPlayerRolling && !sInvincible
-			&& ((EnemyData*)collEnemy->data)->fadeOut == 0) {
+			&& sbGetCharacterFadeOut(collEnemy) == 0) {
 		self->hSpeed = sign(self->x - collEnemy->x) * KNOCKBACK_VELOCITY;
 		self->vSpeed = -KNOCKBACK_VELOCITY;
 		gFlicker = FLICKER_FRAMES;
-		gPlayerHP -= ((EnemyData*)collEnemy->data)->power;
+		gPlayerHP -= sbGetCharacterPower(collEnemy);
 	} else if (collEnemy != NULL && sPlayerRolling) {
-		((EnemyData*)collEnemy->data)->fadeOut = ENEMY_FADE_OUT_TIME;
+		sbSetCharacterFadeOut(collEnemy, ENEMY_FADE_OUT_TIME);
 		collEnemy->hSpeed = ENEMY_KNOCKBACK_VELOCITY * self->scaleX;
 		collEnemy->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
 	}
@@ -82,7 +82,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	sRollCooldown -= jamRendererGetDelta();
 
 	// Physics
-	sbProcessPhysics(
+	sbProcCharacterPhysics(
 			world,
 			self,
 			jamControlMapCheck(gPlayerControls, "jump") != 0,
@@ -95,7 +95,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 			&sPlayerJumped
 	);
 
-	sbProcessAnimations(
+	sbProcCharacterAnimations(
 			world,
 			self,
 			sPlayerWalkSprite,
@@ -116,7 +116,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	}
 
 	// Collisions
-	sbProcessCollisions(world, self, &hor, &vert);
+	sbProcCharacterCollisions(world, self, &hor, &vert);
 	if (hor) {
 		sPlayerRolling = false;
 		sRollCooldown = 0;
@@ -125,7 +125,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	if (vert)
 		sPlayerJumped = false;
 
-	sbProcessMovement(world, self);
+	sbProcCharacterMovement(world, self);
 
 	// Player can't horizontally walk out of the game world
 	self->x = clamp(self->x, 0, world->worldMaps[0]->width * world->worldMaps[0]->cellWidth);

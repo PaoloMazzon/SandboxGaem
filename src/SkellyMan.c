@@ -6,11 +6,11 @@
 extern JamAssetHandler* gGameData;
 
 void onSkellyManCreate(JamWorld* world, JamEntity* self) {
-	self->data = sbCreateEnemyData(10);
+	onCharacterCreate(world, self);
 }
 
 void onSkellyManDestroy(JamWorld* world, JamEntity* self) {
-	free(self->data);
+	onCharacterDestroy(world, self);
 }
 
 void onSkellyManFrame(JamWorld* world, JamEntity* self) {
@@ -25,41 +25,41 @@ void onSkellyManFrame(JamWorld* world, JamEntity* self) {
 		sSkellyWalk = jamAssetHandlerGetSprite(gGameData, "SkellyManRunningSprite");
 
 	// Determine where this feller going
-	if (sbGetEnemyPauseTime(self) > 0) {
-		sbTickEnemyPauseTime(self);
-	} else if (sbGetEnemyPauseTime(self) <= 0 && sbGetEnemyMoveTime(self) <= 0) {
-		sbSetEnemyMoveTime(self, SKELLYMAN_WALK_INTERVAL);
-		sbSetEnemyMovement(self, rand() > RAND_MAX / 2 ? 1 : -1);
+	if (sbGetCharacterPauseTime(self) > 0) {
+		sbTickCharacterPauseTime(self);
+	} else if (sbGetCharacterPauseTime(self) <= 0 && sbGetCharacterMoveTime(self) <= 0) {
+		sbSetCharacterMoveTime(self, SKELLYMAN_WALK_INTERVAL);
+		sbSetCharacterMovement(self, rand() > RAND_MAX / 2 ? 1 : -1);
 	}
-	if (sbGetEnemyMoveTime(self) > 0) {
-		sbTickEnemyMoveTime(self);
-		if (sbGetEnemyMoveTime(self) <= 0) {
-			sbSetEnemyPauseTime(self, SKELLYMAN_PAUSE_INTERVAL);
-			sbSetEnemyMovement(self, 0);
+	if (sbGetCharacterMoveTime(self) > 0) {
+		sbTickCharacterMoveTime(self);
+		if (sbGetCharacterMoveTime(self) <= 0) {
+			sbSetCharacterPauseTime(self, SKELLYMAN_PAUSE_INTERVAL);
+			sbSetCharacterMovement(self, 0);
 		}
 	}
 
-	sbProcessPhysics(
+	sbProcCharacterPhysics(
 			world,
 			self,
 			false,
-			!sbGetEnemyDead(self) ? sbGetEnemyMovement(self) : 0,
-			!sbGetEnemyDead(self),
+			!sbGetCharacterDead(self) ? sbGetCharacterMovement(self) : 0,
+			!sbGetCharacterDead(self),
 			SKELLYMAN_ACCELERATION,
 			0,
-			!sbGetEnemyDead(self) ? SKELLYMAN_MAX_SPEED : FAST_SPEED,
+			!sbGetCharacterDead(self) ? SKELLYMAN_MAX_SPEED : FAST_SPEED,
 			NULL
 	);
 
-	sbProcessAnimations(world, self, sSkellyWalk, sSkellyStand, sSkellyStand, !sbGetEnemyDead(self));
+	sbProcCharacterAnimations(world, self, sSkellyWalk, sSkellyStand, sSkellyStand, !sbGetCharacterDead(self));
 
-	if (sbProcessEnemyDeath(world, self)) {
-		sbProcessCollisions(world, self, &horizontal, NULL);
-		if (horizontal && sbGetEnemyMovement(self) != 0)
-			sbSetEnemyMovement(self, sbGetEnemyMovement(self) == 1 ? -1 : 1);
+	if (sbProcessCharacterDeath(world, self)) {
+		sbProcCharacterCollisions(world, self, &horizontal, NULL);
+		if (horizontal && sbGetCharacterMovement(self) != 0)
+			sbSetCharacterMovement(self, sbGetCharacterMovement(self) == 1 ? -1 : 1);
 	}
 
-	sbProcessMovement(world, self);
+	sbProcCharacterMovement(world, self);
 }
 
 void onSkellyManDraw(JamWorld* world, JamEntity* self) {

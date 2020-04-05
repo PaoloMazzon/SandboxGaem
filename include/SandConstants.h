@@ -14,9 +14,16 @@
 #define BLOCK_SIZE 8
 #define DISPLAY_QUEUE_SIZE 20
 
-// Entity types
+// Entity type checkers
+#define IS_TYPE_CHARACTER(t) ((t) == TYPE_PLAYER || (t) > 999)
+#define IS_TYPE_LOGIC(t) ((t) > 0 && (t) < 1000 && (t) != TYPE_PLAYER)
+#define IS_TYPE_ENEMY(t) ((t) >= 1000 && (t) < 2000)
+#define IS_TYPE_NPC(t) ((t) >= 2000 && (t) < 3000)
+
+// Entity types of individual things
+#define TYPE_UNKNOWN 0
 #define TYPE_PLAYER 1
-#define TYPE_ENEMY 2
+#define TYPE_SKELLYMAN 2000
 
 // How many frames (in delta time) should the flicker last
 #define FLICKER_FRAMES 90
