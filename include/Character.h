@@ -1,15 +1,82 @@
 #include <JamEngine.h>
 #pragma once
 
+/// \brief Data specific to characters in the game
 typedef struct {
-	double moveTime;  ///< Amount of time remaining in this walking bit
-	double pauseTime; ///< Amount of time remaining in this pause
-	double movement;  ///< Which direction to move in
-	double fadeOut;   ///< Death fade out timer
-	double power;     ///< Damage this enemy deals to the player
+	// What the character is currently up to
+	struct {
+		double moveTime;  // Amount of time remaining in this walking bit
+		double pauseTime; // Amount of time remaining in this pause
+		double movement;  // Which direction to move in
+		bool rolling;     // Weather or not this character is rolling
+		double fadeOut;   // Death fade out timer
+	} State;
+
+	// Information about this character
+	struct {
+		double thorns;       // Damage this enemy deals to the player on contact
+		double rollDamage;   // Damage dealt while rolling
+		double rollSpeed;    // Speed of this character while rolling
+		double rollDuration; // Duration of the roll in delta
+		double rollCooldown; // Cooldown time between rolls in delta
+		double hp;           // Current health of the character
+		double maxHP;        // Max health of the character
+		double airRes;       // Resistance to roll damage while mid-air
+	} Stats;
 } CharacterData;
 
 //////////////////// Common Data ////////////////////
+
+/// \brief Checks weather or not an entity is rolling
+bool sbGetCharacterRolling(JamEntity* ent);
+
+/// \brief Gets an entity's thorns
+double sbGetCharacterThorns(JamEntity* ent);
+
+/// \brief Sets an entity's thorns
+void sbSetCharacterThorns(JamEntity* ent, double thorns);
+
+/// \brief Gets an entity's thorns
+double sbGetCharacterRollDamage(JamEntity* ent);
+
+/// \brief Sets an entity's thorns
+void sbSetCharacterRollDamage(JamEntity* ent, double thorns);
+
+/// \brief Gets an entity's rollSpeed
+double sbGetCharacterRollSpeed(JamEntity* ent);
+
+/// \brief Sets an entity's rollSpeed
+void sbSetCharacterRollSpeed(JamEntity* ent, double rollSpeed);
+
+/// \brief Gets an entity's rollDuration
+double sbGetCharacterRollDuration(JamEntity* ent);
+
+/// \brief Sets an entity's rollDuration
+void sbSetCharacterRollDuration(JamEntity* ent, double rollDuration);
+
+/// \brief Gets an entity's rollCooldown
+double sbGetCharacterRollCooldown(JamEntity* ent);
+
+/// \brief Sets an entity's rollCooldown
+void sbSetCharacterRollCooldown(JamEntity* ent, double rollCooldown);
+
+/// \brief Gets an entity's hp
+double sbGetCharacterHp(JamEntity* ent);
+
+/// \brief Sets an entity's hp
+void sbSetCharacterHp(JamEntity* ent, double hp);
+
+/// \brief Gets an entity's maxHP
+double sbGetCharacterMaxHP(JamEntity* ent);
+
+/// \brief Sets an entity's maxHP
+void sbSetCharacterMaxHP(JamEntity* ent, double maxHP);
+
+/// \brief Gets an entity's airRes
+double sbGetCharacterAirRes(JamEntity* ent);
+
+/// \brief Sets an entity's airRes
+void sbSetCharacterAirRes(JamEntity* ent, double airRes);
 
 /// \brief Processes an enemy's death animation should he be dead, returning weather or not to process collisions
 bool sbProcessCharacterDeath(JamWorld *world, JamEntity *enemy);
