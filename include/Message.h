@@ -14,7 +14,7 @@ bool sbMessageActive();
 /// \brief Queues a message to the message
 /// \param name Name of the speaker
 /// \param message Message content
-/// \param id ID of the entity speaking or NULL
+/// \param id ID of the entity speaking or ID_NOT_ASSIGNED
 void sbQueueMessage(const char* name, const char* message, int id);
 
 /// \brief Draws the current message as well as updates it

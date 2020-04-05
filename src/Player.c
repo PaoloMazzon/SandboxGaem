@@ -4,6 +4,7 @@
 #include <JamEngine.h>
 #include <TileMap.h>
 #include <Character.h>
+#include <Message.h>
 
 /////////////// Player Globals ///////////////
 extern JamAssetHandler* gGameData;
@@ -15,6 +16,17 @@ static int gMaxPlayerHP = 100;
 ////////////////////////////////////////////////////////////
 void onPlayerCreate(JamWorld* world, JamEntity* self) {
 	onCharacterCreate(world, self);
+	sbStartMesssageQueue();
+	sbQueueMessage(NARRATOR_NAME, "There once lived a mate so boring\n"
+								  "Who compared to none but his flooring\n"
+								  "He decided one day\n"
+								  "To throw it all away\n"
+								  "And set out into the wild exploring", ID_NOT_ASSIGNED);
+	sbQueueMessage(NARRATOR_NAME, "While his ignorance is naught but endless\n"
+								  "And he is caught in a rut that is friendless\n"
+								  "His grit was unmatched\n"
+								  "And his chain unlatched\n"
+								  "He thought himself a legend, deathless", ID_NOT_ASSIGNED);
 }
 ////////////////////////////////////////////////////////////
 

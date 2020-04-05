@@ -13,6 +13,7 @@
 #define JUMP_ROT_SPEED 15
 #define BLOCK_SIZE 8
 #define DISPLAY_QUEUE_SIZE 20
+#define NARRATOR_NAME "Narrator"
 
 // Entity type checkers
 #define IS_TYPE_CHARACTER(t) ((t) == TYPE_PLAYER || (t) > 999)

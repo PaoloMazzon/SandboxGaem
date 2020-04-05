@@ -4,6 +4,7 @@
 #include <math.h>
 #include <SandConstants.h>
 #include <string.h>
+#include <Message.h>
 
 // The global asset handler for the game
 JamAssetHandler* gGameData;
@@ -74,6 +75,9 @@ void runGame(bool debug) {
 		jamWorldProcFrame(gameWorld);
 		jamDrawTileMap(gameWorld->worldMaps[WORLD_FOREFRONT_LAYER], 0, 0, 0, 0, 0, 0);
 
+		// Draw any active messages
+		sbDrawMessage(gameWorld);
+
 		// Debug
 		if (debug) {
 			jamFontRender(
@@ -134,6 +138,8 @@ int main(int argc, const char* argv[]) {
 	jamControlMapAddInput(gControlMap, "run", JAM_BUTTON_X, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, 1);
 	jamControlMapAddInput(gControlMap, "roll", JAM_KB_X, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_PRESSED, 1);
 	jamControlMapAddInput(gControlMap, "roll", JAM_BUTTON_B, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gControlMap, "message", JAM_BUTTON_A, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gControlMap, "message", JAM_KB_Z, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_PRESSED, 1);
 
 	// Run the game
 	runMenu(debug);
