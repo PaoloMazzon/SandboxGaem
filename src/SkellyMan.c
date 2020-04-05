@@ -1,9 +1,7 @@
-#include <EntityBehaviour.h>
 #include <SandConstants.h>
 #include <math.h>
 #include <stdlib.h>
-#include <Enemies.h>
-#include <EntityCommon.h>
+#include <Character.h>
 
 extern JamAssetHandler* gGameData;
 

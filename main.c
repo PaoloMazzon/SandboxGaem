@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <JamEngine.h>
-#include <EntityBehaviour.h>
+#include <Character.h>
 #include <math.h>
 #include <SandConstants.h>
 #include <string.h>
@@ -10,6 +10,7 @@ JamAssetHandler* gGameData;
 
 void runGame(bool debug) {
 	bool stopRunning = false;
+	bool fullscreen = false;
 
 	// Data we're allocating and need to free
 	JamBehaviourMap* bMap = jamBehaviourMapCreate();
@@ -55,7 +56,7 @@ void runGame(bool debug) {
 		jamDrawTexture(background2Tex, (int)floor(camX + GAME_WIDTH), (int)round(camY));
 
 		// Front mountain
-		camX = jamRendererGetCameraX() * 0.60;
+		camX = jamRendererGetCameraX() * 0.55;
 		while (camX < jamRendererGetCameraX() - GAME_WIDTH)
 			camX += GAME_WIDTH;
 		jamDrawTexture(background1Tex, (int)floor(camX), (int)round(camY));
@@ -81,6 +82,17 @@ void runGame(bool debug) {
 			);
 		}
 
+		if (jamInputCheckKeyPressed(JAM_KB_F4)) {
+			fullscreen = !fullscreen;
+			if (fullscreen) {
+				jamRendererReset(GAME_WIDTH, GAME_HEIGHT, true);
+				jamRendererIntegerScale();
+			} else {
+				jamRendererReset(GAME_WIDTH * DEFAULT_GAME_SCALE, GAME_HEIGHT * DEFAULT_GAME_SCALE, false);
+				jamRendererConfig(GAME_WIDTH, GAME_HEIGHT, GAME_WIDTH * DEFAULT_GAME_SCALE, GAME_HEIGHT * DEFAULT_GAME_SCALE);
+			}
+		}
+
 		jamRendererProcEndFrame();
 	}
 
@@ -101,6 +113,7 @@ int main(int argc, const char* argv[]) {
 	jamRendererInit(&argc, (char**)argv, "Gaem", GAME_WIDTH, GAME_HEIGHT, 60);
 	jamRendererReset(GAME_WIDTH * DEFAULT_GAME_SCALE, GAME_HEIGHT * DEFAULT_GAME_SCALE, false);
 	jamRendererIntegerScale();
+	jamRendererSetVSync(true);
 	jamRendererSetIcon("assets/icon.png");
 	runMenu(debug);
 	jamRendererQuit();

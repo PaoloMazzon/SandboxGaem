@@ -1,11 +1,9 @@
-#include "Player.h"
 #include <malloc.h>
 #include <math.h>
-#include <EntityCommon.h>
 #include <SandConstants.h>
 #include <JamEngine.h>
 #include <TileMap.h>
-#include <Enemies.h>
+#include <Character.h>
 
 /////////////// Player Globals ///////////////
 extern JamAssetHandler* gGameData;
