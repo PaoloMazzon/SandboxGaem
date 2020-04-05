@@ -8,6 +8,9 @@
 // The global asset handler for the game
 JamAssetHandler* gGameData;
 
+// The controls handler
+JamControlMap* gControlMap;
+
 void runGame(bool debug) {
 	bool stopRunning = false;
 	bool fullscreen = false;
@@ -110,12 +113,33 @@ int main(int argc, const char* argv[]) {
 	if (argc > 1 && strcmp(argv[1], "--debug") == 0)
 		debug = true;
 
+	// Setup jamengine
 	jamRendererInit(&argc, (char**)argv, "Gaem", GAME_WIDTH, GAME_HEIGHT, 60);
 	jamRendererReset(GAME_WIDTH * DEFAULT_GAME_SCALE, GAME_HEIGHT * DEFAULT_GAME_SCALE, false);
 	jamRendererIntegerScale();
 	jamRendererSetVSync(true);
 	jamRendererSetIcon("assets/icon.png");
+	
+	// Setup the controls
+	gControlMap = jamControlMapCreate();
+	jamControlMapAddInput(gControlMap, "move", JAM_KB_RIGHT, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gControlMap, "move", JAM_KB_LEFT, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_ACTIVE, -1);
+	jamControlMapAddInput(gControlMap, "move", JAM_AXIS_LEFTX, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gControlMap, "move", JAM_BUTTON_DPAD_LEFT, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, -1);
+	jamControlMapAddInput(gControlMap, "move", JAM_BUTTON_DPAD_RIGHT, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gControlMap, "jump", JAM_KB_UP, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gControlMap, "jump", JAM_AXIS_LEFTY, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gControlMap, "jump", JAM_BUTTON_A, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gControlMap, "run", JAM_KB_Z, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gControlMap, "run", JAM_BUTTON_X, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gControlMap, "roll", JAM_KB_X, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gControlMap, "roll", JAM_BUTTON_B, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
+
+	// Run the game
 	runMenu(debug);
+
+	// Free assets
+	jamControlMapFree(gControlMap);
 	jamRendererQuit();
 	return 0;
 }

@@ -117,12 +117,6 @@ void sbSetCharacterFadeOut(JamEntity *enemy, double fadeOut);
 /// \brief Subtracts the delta from fade out
 void sbTickCharacterFadeOut(JamEntity *enemy);
 
-/// \brief Gets the power from an entity
-double sbGetCharacterPower(JamEntity *enemy);
-
-/// \brief Sets the power of an entity
-void sbSetCharacterPower(JamEntity *enemy, double power);
-
 /// \brief Processes an entity's general physics but collisions are done with sbProcessCollisions
 /// \param world World the entity is in
 /// \param self Entity that is to be processed

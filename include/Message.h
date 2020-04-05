@@ -5,6 +5,12 @@
 #pragma once
 #include <JamEngine.h>
 
+/// \brief Starts a message queue, overwriting any previous ones
+void sbStartMesssageQueue();
+
+/// \brief Returns weather or not there is a message active
+bool sbMessageActive();
+
 /// \brief Queues a message to the message
 /// \param name Name of the speaker
 /// \param message Message content
