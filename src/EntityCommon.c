@@ -43,14 +43,14 @@ void sbProcessAnimations(JamWorld* world, JamEntity* self, JamSprite* walking, J
 	// Animation control
 	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
 		if (self->hSpeed != 0) {
-			self->sprite = walking;
+			jamEntitySetSprite(self, walking);
 			self->rot = stopRot ? 0 : self->rot;
 		} else {
-			self->sprite = standing;
+			jamEntitySetSprite(self, standing);
 			self->rot = stopRot ? 0 : self->rot;
 		}
 	} else {
-		self->sprite = jumping;
+		jamEntitySetSprite(self, jumping);
 	}
 	if (self->hSpeed > 0)
 		self->scaleX = 1;

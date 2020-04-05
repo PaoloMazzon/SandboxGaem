@@ -27,17 +27,17 @@ void onSkellyManFrame(JamWorld* world, JamEntity* self) {
 		sSkellyWalk = jamAssetHandlerGetSprite(gGameData, "SkellyManRunningSprite");
 
 	// Determine where this feller going
-	if (((EnemyData*)self->data)->pauseTime > 0) {
-		((EnemyData*)self->data)->pauseTime -= jamRendererGetDelta();
-	} else if (((EnemyData*)self->data)->pauseTime <= 0 && ((EnemyData*)self->data)->moveTime <= 0) {
-		((EnemyData*)self->data)->moveTime = SKELLYMAN_WALK_INTERVAL;
-		((EnemyData*)self->data)->movement = rand() > RAND_MAX / 2 ? 1 : -1;
+	if (sbGetEnemyPauseTime(self) > 0) {
+		sbTickEnemyPauseTime(self);
+	} else if (sbGetEnemyPauseTime(self) <= 0 && sbGetEnemyMoveTime(self) <= 0) {
+		sbSetEnemyMoveTime(self, SKELLYMAN_WALK_INTERVAL);
+		sbSetEnemyMovement(self, rand() > RAND_MAX / 2 ? 1 : -1);
 	}
-	if (((EnemyData*)self->data)->moveTime > 0) {
-		((EnemyData*)self->data)->moveTime -= jamRendererGetDelta();
-		if (((EnemyData*)self->data)->moveTime <= 0) {
-			((EnemyData*)self->data)->pauseTime = SKELLYMAN_PAUSE_INTERVAL;
-			((EnemyData*)self->data)->movement = 0;
+	if (sbGetEnemyMoveTime(self) > 0) {
+		sbTickEnemyMoveTime(self);
+		if (sbGetEnemyMoveTime(self) <= 0) {
+			sbSetEnemyPauseTime(self, SKELLYMAN_PAUSE_INTERVAL);
+			sbSetEnemyMovement(self, 0);
 		}
 	}
 
@@ -45,30 +45,20 @@ void onSkellyManFrame(JamWorld* world, JamEntity* self) {
 			world,
 			self,
 			false,
-			((EnemyData*)self->data)->fadeOut == 0 ? ((EnemyData*)self->data)->movement : 0,
-			!((EnemyData*)self->data)->fadeOut,
+			!sbGetEnemyDead(self) ? sbGetEnemyMovement(self) : 0,
+			!sbGetEnemyDead(self),
 			SKELLYMAN_ACCELERATION,
 			0,
-			((EnemyData*)self->data)->fadeOut == 0 ? SKELLYMAN_MAX_SPEED : FAST_SPEED,
+			!sbGetEnemyDead(self) ? SKELLYMAN_MAX_SPEED : FAST_SPEED,
 			NULL
 	);
 
-	// Animations
-	sbProcessAnimations(world, self, sSkellyWalk, sSkellyStand, sSkellyStand, ((EnemyData*)self->data)->fadeOut == 0);
+	sbProcessAnimations(world, self, sSkellyWalk, sSkellyStand, sSkellyStand, !sbGetEnemyDead(self));
 
-	// Either death or collisions
-	if (((EnemyData *) self->data)->fadeOut != 0) {
-		self->rot += ENEMY_DEATH_ROT_SPEED;
-		self->vSpeed += COMICAL_GRAVITY_ACCELERATION - GRAVITY_ACCELERATION;
-		self->alpha = (uint8) (((EnemyData *) self->data)->fadeOut / ENEMY_FADE_OUT_TIME * 255);
-		((EnemyData *) self->data)->fadeOut -= jamRendererGetDelta();
-		if (((EnemyData *) self->data)->fadeOut <= 0) {
-			jamWorldRemoveEntity(world, self->id);
-		}
-	} else {
+	if (sbProcessEnemyDeath(world, self)) {
 		sbProcessCollisions(world, self, &horizontal, NULL);
-		if (horizontal && ((EnemyData *) self->data)->movement != 0)
-			((EnemyData *) self->data)->movement = ((EnemyData *) self->data)->movement == 1 ? -1 : 1;
+		if (horizontal && sbGetEnemyMovement(self) != 0)
+			sbSetEnemyMovement(self, sbGetEnemyMovement(self) == 1 ? -1 : 1);
 	}
 
 	sbProcessMovement(world, self);
