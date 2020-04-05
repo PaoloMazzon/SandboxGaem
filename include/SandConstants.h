@@ -12,6 +12,7 @@
 #define WORLD_FOREFRONT_LAYER 3
 #define JUMP_ROT_SPEED 15
 #define BLOCK_SIZE 8
+#define DISPLAY_QUEUE_SIZE 20
 
 // Entity types
 #define TYPE_PLAYER 1
