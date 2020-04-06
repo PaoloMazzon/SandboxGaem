@@ -55,21 +55,27 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		sPlayerJumpSprite = jamAssetHandlerGetSprite(gGameData, "PlayerJumpingSprite");
 	}
 
-	///////////////// Enemy collisions /////////////////
-	JamEntity* collEnemy = jamWorldEntityCollision(world, self, self->x, self->y);
-	collEnemy = (collEnemy != NULL && IS_TYPE_ENEMY(collEnemy->type)) ? collEnemy : NULL;
-	
-	// Throw the player away from the enemy if colliding or if rolling throw the enemy out
-	if (collEnemy != NULL && gFlicker <= 0 && !sPlayerRolling && !sInvincible
-			&& sbGetCharacterFadeOut(collEnemy) == 0) {
-		self->hSpeed = sign(self->x - collEnemy->x) * KNOCKBACK_VELOCITY;
-		self->vSpeed = -KNOCKBACK_VELOCITY;
-		gFlicker = FLICKER_FRAMES;
-		gPlayerHP -= sbGetCharacterThorns(collEnemy);
-	} else if (collEnemy != NULL && sPlayerRolling) {
-		sbSetCharacterFadeOut(collEnemy, ENEMY_FADE_OUT_TIME);
-		collEnemy->hSpeed = ENEMY_KNOCKBACK_VELOCITY * self->scaleX;
-		collEnemy->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
+	//////////////////////////// Entity Collisions ////////////////////////////
+	JamEntity* collision = jamWorldEntityCollision(world, self, self->x, self->y);
+
+	while (collision != NULL) {
+		// Enemy collisions
+		if (IS_TYPE_ENEMY(collision->type)) {
+			// Throw the player away from the enemy if colliding or if rolling throw the enemy out
+			if (gFlicker <= 0 && !sPlayerRolling && !sInvincible
+				&& sbGetCharacterFadeOut(collision) == 0) {
+				self->hSpeed = sign(self->x - collision->x) * KNOCKBACK_VELOCITY;
+				self->vSpeed = -KNOCKBACK_VELOCITY;
+				gFlicker = FLICKER_FRAMES;
+				gPlayerHP -= sbGetCharacterThorns(collision);
+			} else if (sPlayerRolling) {
+				sbSetCharacterFadeOut(collision, ENEMY_FADE_OUT_TIME);
+				collision->hSpeed = ENEMY_KNOCKBACK_VELOCITY * self->scaleX;
+				collision->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
+			}
+		}
+
+		collision = jamWorldEntityCollision(world, self, self->x, self->y);
 	}
 
 	// Rolling
