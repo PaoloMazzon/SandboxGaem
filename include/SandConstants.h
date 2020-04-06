@@ -14,6 +14,8 @@
 #define BLOCK_SIZE 8
 #define DISPLAY_QUEUE_SIZE 20
 #define NARRATOR_NAME "Narrator"
+#define FONT_CHARACTER_WIDTH 8
+#define FONT_CHARACTER_HEIGHT 8
 
 // Entity type checkers
 #define IS_TYPE_CHARACTER(t) ((t) == TYPE_PLAYER || (t) > 999)

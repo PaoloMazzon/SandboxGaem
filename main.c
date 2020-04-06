@@ -134,12 +134,19 @@ int main(int argc, const char* argv[]) {
 	jamControlMapAddInput(gControlMap, "jump", JAM_KB_UP, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_PRESSED, 1);
 	jamControlMapAddInput(gControlMap, "jump", JAM_AXIS_LEFTY, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
 	jamControlMapAddInput(gControlMap, "jump", JAM_BUTTON_A, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gControlMap, "interact", JAM_KB_C, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gControlMap, "interact", JAM_BUTTON_A, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
 	jamControlMapAddInput(gControlMap, "run", JAM_KB_Z, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_ACTIVE, 1);
 	jamControlMapAddInput(gControlMap, "run", JAM_BUTTON_X, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, 1);
 	jamControlMapAddInput(gControlMap, "roll", JAM_KB_X, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_PRESSED, 1);
 	jamControlMapAddInput(gControlMap, "roll", JAM_BUTTON_B, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
 	jamControlMapAddInput(gControlMap, "message", JAM_BUTTON_A, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_PRESSED, 1);
 	jamControlMapAddInput(gControlMap, "message", JAM_KB_Z, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_PRESSED, 1);
+	jamControlMapAddInput(gControlMap, "message_scroll", JAM_KB_DOWN, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gControlMap, "message_scroll", JAM_KB_UP, 0, JAM_KEYBOARD_INPUT, JAM_INPUT_ACTIVE, -1);
+	jamControlMapAddInput(gControlMap, "message_scroll", JAM_AXIS_LEFTY, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, 1);
+	jamControlMapAddInput(gControlMap, "message_scroll", JAM_BUTTON_DPAD_UP, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, -1);
+	jamControlMapAddInput(gControlMap, "message_scroll", JAM_BUTTON_DPAD_DOWN, 0, JAM_GAMEPAD_INPUT, JAM_INPUT_ACTIVE, 1);
 
 	// Run the game
 	runMenu(debug);

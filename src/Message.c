@@ -8,17 +8,20 @@
 #include <JamEngine.h>
 #include <SandConstants.h>
 #include <Sprite.h>
+#include <memory.h>
 
 typedef struct {
-	const char* message; // Content of the message
+	JamTexture* content; // Content of the message in a texture
 	const char* name;    // Name of the speaker
 	int id;              // ID of the entity speaking it or NULL
+	int height;          // Height in pixels of the actual content
 } _SBMessageContent;
 
 typedef struct {
 	_SBMessageContent queue[DISPLAY_QUEUE_SIZE]; // Queue of messages
 	int currentMessage;                          // Current message (wraps around)
 	int queueEnd;                                // Last message in the queue
+	int scroll;                                  // How far down in pixels we are in the content texture
 } _SBMessageQueue;
 
 static _SBMessageQueue gMessageQueue;
@@ -27,6 +30,20 @@ static JamFont* gGameFont; // Font we will grab from the handler
 static JamTexture* gDialogueBubble; // Another texture from the handler
 extern JamAssetHandler* gGameData;
 extern JamControlMap* gControlMap;
+
+// Returns the number of characters in the current word *
+static int _widthOfNextWord(char* string) {
+	int pos = 0;
+	int size = 0;
+	uint32 c = jamStringNextUnicode(string, &pos);
+
+	while (c != 0 && c != 32 && c != '\n') {
+		size += FONT_CHARACTER_WIDTH;
+		c = jamStringNextUnicode(string, &pos);
+	}
+
+	return size;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void sbStartMesssageQueue() {
@@ -49,9 +66,35 @@ bool sbMessageActive() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void sbQueueMessage(const char* name, const char* message, int id) {
+	int i = 0;
+	int x = 0;
+	int y = 0;
+	int h = 0;
+	int pos = 0;
+	uint32 c = jamStringNextUnicode(message, &pos);
+	int len = (int)strlen(message);
+
 	gMessageQueue.queue[gMessageQueue.queueEnd].name = name;
 	gMessageQueue.queue[gMessageQueue.queueEnd].id = id;
-	gMessageQueue.queue[gMessageQueue.queueEnd].message = message;
+
+	// I have arbitrarily decided that the texture is 180 pixels tall (up to 20 lines of text)
+	gMessageQueue.queue[gMessageQueue.queueEnd].content = jamTextureCreate(gMessageTexture->w - 8, 180);
+
+	jamRendererSetTarget(gMessageQueue.queue[gMessageQueue.queueEnd].content);
+	while (c != 0) {
+		if (c == '\n' || _widthOfNextWord((char *) (message + i)) + x > gMessageTexture->w - 8) {
+			y += FONT_CHARACTER_HEIGHT + 1;
+			x = 0;
+		}
+		jamFontRenderCharacter(gGameFont, x, y, c, 255, 255, 255);
+		x += c != '\n' ? FONT_CHARACTER_WIDTH : 0;
+		c = jamStringNextUnicode(message, &pos);
+		i++;
+	}
+	jamRendererSetTarget(NULL);
+
+	gMessageQueue.queue[gMessageQueue.queueEnd].height = y + FONT_CHARACTER_HEIGHT;
+
 	gMessageQueue.queueEnd++;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,20 +111,23 @@ void sbDrawMessage(JamWorld* world) {
 		jamDrawTexture(gMessageTexture, texX, texY);
 
 		// Name of the speaker
-		jamFontRender(
+		jamFontRenderColour(
 				gGameFont,
 				texX + 1,
-				texY + 4,
-				gMessageQueue.queue[gMessageQueue.currentMessage].name
+				texY + 2,
+				gMessageQueue.queue[gMessageQueue.currentMessage].name,
+				0x14, 0x07, 0x52
 		);
 
 		// Content of the message
-		jamFontRenderExt(
-				gGameFont,
+		jamDrawTexturePart(
+				gMessageQueue.queue[gMessageQueue.currentMessage].content,
 				texX + 5,
-				texY + 22,
-				gMessageQueue.queue[gMessageQueue.currentMessage].message,
-				gMessageTexture->w - 8
+				texY + 14,
+				0,
+				gMessageQueue.scroll,
+				gMessageQueue.queue[gMessageQueue.currentMessage].content->w,
+				9 * 5
 		);
 
 		// Speech bubble
@@ -97,8 +143,13 @@ void sbDrawMessage(JamWorld* world) {
 		}
 
 		// Manage queue
+		gMessageQueue.scroll += jamControlMapCheck(gControlMap, "message_scroll");
+		gMessageQueue.scroll = (int)clamp(gMessageQueue.scroll, 0, gMessageQueue.queue[gMessageQueue.currentMessage].height - 9 * 5 + 1);
 		if (jamControlMapCheck(gControlMap, "message")) {
+			jamTextureFree(gMessageQueue.queue->content);
+			gMessageQueue.queue->content = NULL;
 			gMessageQueue.currentMessage++;
+			gMessageQueue.scroll = 0;
 			if (gMessageQueue.queueEnd == gMessageQueue.currentMessage)
 				gMessageQueue.queueEnd = 0;
 		}
