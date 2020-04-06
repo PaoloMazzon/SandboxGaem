@@ -66,36 +66,38 @@ bool sbMessageActive() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void sbQueueMessage(const char* name, const char* message, int id) {
-	int i = 0;
-	int x = 0;
-	int y = 0;
-	int h = 0;
-	int pos = 0;
-	uint32 c = jamStringNextUnicode(message, &pos);
-	int len = (int)strlen(message);
+	if (name != NULL && message != NULL) {
+		int i = 0;
+		int x = 0;
+		int y = 0;
+		int h = 0;
+		int pos = 0;
+		uint32 c = jamStringNextUnicode(message, &pos);
+		int len = (int) strlen(message);
 
-	gMessageQueue.queue[gMessageQueue.queueEnd].name = name;
-	gMessageQueue.queue[gMessageQueue.queueEnd].id = id;
+		gMessageQueue.queue[gMessageQueue.queueEnd].name = name;
+		gMessageQueue.queue[gMessageQueue.queueEnd].id = id;
 
-	// I have arbitrarily decided that the texture is 180 pixels tall (up to 20 lines of text)
-	gMessageQueue.queue[gMessageQueue.queueEnd].content = jamTextureCreate(gMessageTexture->w - 8, 180);
+		// I have arbitrarily decided that the texture is 180 pixels tall (up to 20 lines of text)
+		gMessageQueue.queue[gMessageQueue.queueEnd].content = jamTextureCreate(gMessageTexture->w - 8, 180);
 
-	jamRendererSetTarget(gMessageQueue.queue[gMessageQueue.queueEnd].content);
-	while (c != 0) {
-		if (c == '\n' || _widthOfNextWord((char *) (message + i)) + x > gMessageTexture->w - 8) {
-			y += FONT_CHARACTER_HEIGHT + 1;
-			x = 0;
+		jamRendererSetTarget(gMessageQueue.queue[gMessageQueue.queueEnd].content);
+		while (c != 0) {
+			if (c == '\n' || _widthOfNextWord((char *) (message + i)) + x > gMessageTexture->w - 8) {
+				y += FONT_CHARACTER_HEIGHT + 1;
+				x = 0;
+			}
+			jamFontRenderCharacter(gGameFont, x, y, c, 255, 255, 255);
+			x += c != '\n' ? FONT_CHARACTER_WIDTH : 0;
+			c = jamStringNextUnicode(message, &pos);
+			i++;
 		}
-		jamFontRenderCharacter(gGameFont, x, y, c, 255, 255, 255);
-		x += c != '\n' ? FONT_CHARACTER_WIDTH : 0;
-		c = jamStringNextUnicode(message, &pos);
-		i++;
+		jamRendererSetTarget(NULL);
+
+		gMessageQueue.queue[gMessageQueue.queueEnd].height = y + FONT_CHARACTER_HEIGHT;
+
+		gMessageQueue.queueEnd++;
 	}
-	jamRendererSetTarget(NULL);
-
-	gMessageQueue.queue[gMessageQueue.queueEnd].height = y + FONT_CHARACTER_HEIGHT;
-
-	gMessageQueue.queueEnd++;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -150,8 +152,10 @@ void sbDrawMessage(JamWorld* world) {
 			gMessageQueue.queue->content = NULL;
 			gMessageQueue.currentMessage++;
 			gMessageQueue.scroll = 0;
-			if (gMessageQueue.queueEnd == gMessageQueue.currentMessage)
+			if (gMessageQueue.queueEnd == gMessageQueue.currentMessage) {
 				gMessageQueue.queueEnd = 0;
+				gMessageQueue.currentMessage = 0;
+			}
 		}
 	}
 }

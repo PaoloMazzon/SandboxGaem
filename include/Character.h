@@ -12,7 +12,7 @@ typedef struct {
 		double fadeOut;   // Death fade out timer
 	} State;
 
-	// Information about this character
+	// Information about the rpg bits
 	struct {
 		double thorns;       // Damage this enemy deals to the player on contact
 		double rollDamage;   // Damage dealt while rolling
@@ -23,9 +23,27 @@ typedef struct {
 		double maxHP;        // Max health of the character
 		double airRes;       // Resistance to roll damage while mid-air
 	} Stats;
+
+	// Information about this character
+	struct {
+		const char* passiveDialogue; // Dialogue triggered if the player talks to this character
+		const char* name;            // Name of this character
+	} Info;
 } CharacterData;
 
 //////////////////// Common Data ////////////////////
+
+/// \brief Gets an entity's passiveDialogue
+const char* sbGetCharacterPassiveDialogue(JamEntity* ent);
+
+/// \brief Sets an entity's passiveDialogue
+void sbSetCharacterPassiveDialogue(JamEntity* ent, const char* passiveDialogue);
+
+/// \brief Gets an entity's name
+const char* sbGetCharacterName(JamEntity* ent);
+
+/// \brief Sets an entity's name
+void sbSetCharacterName(JamEntity* ent, const char* name);
 
 /// \brief Checks weather or not an entity is rolling
 bool sbGetCharacterRolling(JamEntity* ent);

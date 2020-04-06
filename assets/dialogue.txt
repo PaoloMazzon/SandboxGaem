@@ -1,4 +1,4 @@
-[Intro]
+[Player]
 There once lived a mate so boring
 Who compared to none but his flooring
 He decided one day
@@ -16,3 +16,10 @@ and in dialogue really rather colloquial
 He would soon find out
 the degree of these jousts
 and those who would utter obloquial
+
+[Skellyman]
+By day, by night, we instill fright
+Little known, we run not from light
+But for commoners at hand
+We are a kind little band
+That are never too far out of sight

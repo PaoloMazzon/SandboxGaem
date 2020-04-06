@@ -73,6 +73,9 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 				collision->hSpeed = ENEMY_KNOCKBACK_VELOCITY * self->scaleX;
 				collision->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
 			}
+		} else if (IS_TYPE_NPC(collision->type)) {
+			if (jamControlMapCheck(gControlMap, "interact"))
+				sbQueueMessage(sbGetCharacterName(collision), sbGetCharacterPassiveDialogue(collision), collision->id);
 		}
 
 		collision = jamWorldEntityCollision(world, self, self->x, self->y);
@@ -92,8 +95,8 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	sbProcCharacterPhysics(
 			world,
 			self,
-			!sbMessageActive() ? jamControlMapCheck(gControlMap, "jump") != 0 : false,
-			!sbMessageActive() ? jamControlMapCheck(gControlMap, "move") : 0,
+			jamControlMapCheck(gControlMap, "jump") != 0,
+			jamControlMapCheck(gControlMap, "move"),
 			true,
 			PLAYER_ACCELERATION,
 			PLAYER_JUMP_VELOCITY,

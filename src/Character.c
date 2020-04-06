@@ -2,6 +2,7 @@
 #include <Character.h>
 #include <malloc.h>
 #include <SandConstants.h>
+#include <Message.h>
 
 // Getters and setters at the bottom
 
@@ -25,6 +26,10 @@ bool sbProcessCharacterDeath(JamWorld *world, JamEntity *enemy) {
 ////////////////////////////////////////////////////////////////////////
 void sbProcCharacterPhysics(JamWorld *world, JamEntity *self, bool jump, double movement, bool friction,
 							double acceleration, double jumpSpeed, double maxVelocity, bool *jumped) {
+	// Don't accept controls while dialogue is active
+	jump = sbMessageActive() ? false : jump;
+	movement = sbMessageActive() ? 0 : movement;
+
 	bool onGround = jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1);
 
 	// Gravity
@@ -292,5 +297,29 @@ double sbGetCharacterAirRes(JamEntity* ent) {
 ////////////////////////////////////////////////////////////////////////
 void sbSetCharacterAirRes(JamEntity* ent, double airRes) {
 	((CharacterData*)ent->data)->Stats.airRes = airRes;
+}
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+const char* sbGetCharacterPassiveDialogue(JamEntity* ent) {
+	return ((CharacterData*)ent->data)->Info.passiveDialogue;
+}
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+void sbSetCharacterPassiveDialogue(JamEntity* ent, const char* passiveDialogue) {
+	((CharacterData*)ent->data)->Info.passiveDialogue = passiveDialogue;
+}
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+const char* sbGetCharacterName(JamEntity* ent) {
+	return ((CharacterData*)ent->data)->Info.name;
+}
+////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+void sbSetCharacterName(JamEntity* ent, const char* name) {
+	((CharacterData*)ent->data)->Info.name = name;
 }
 ////////////////////////////////////////////////////////////////////////

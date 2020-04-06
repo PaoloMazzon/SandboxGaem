@@ -7,6 +7,12 @@ extern JamAssetHandler* gGameData;
 
 void onSkellyManCreate(JamWorld* world, JamEntity* self) {
 	onCharacterCreate(world, self);
+	sbSetCharacterName(self, "Skellyman");
+	sbSetCharacterPassiveDialogue(self, "By day, by night, we instill fright\n"
+										"Little known, we run not from light\n"
+										"But for commoners at hand\n"
+										"We are a kind little band\n"
+										"That are never too far out of sight");
 }
 
 void onSkellyManDestroy(JamWorld* world, JamEntity* self) {
