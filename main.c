@@ -5,6 +5,7 @@
 #include <SandConstants.h>
 #include <string.h>
 #include <Message.h>
+#include <stdlib.h>
 
 // The global asset handler for the game
 JamAssetHandler* gGameData;

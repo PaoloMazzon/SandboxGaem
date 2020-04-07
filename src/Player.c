@@ -80,7 +80,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 				collision->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
 			}
 		} else if (IS_TYPE_NPC(collision->type)) {
-			if (jamControlMapCheck(gControlMap, "interact"))
+			if (jamControlMapCheck(gControlMap, "interact") && !sbMessageActive())
 				sbQueueMessage(sbCharData(collision, Info, name), sbCharData(collision, Info, passiveDialogue), collision->id);
 		}
 
