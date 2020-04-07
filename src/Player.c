@@ -72,12 +72,13 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 			// Throw the player away from the enemy if colliding or if rolling throw the enemy out
 			if (gFlicker <= 0 && !sPlayerRolling && !sInvincible
 				&& sbCharData(collision, State, fadeOut) == 0) {
-				self->hSpeed = sign(self->x - collision->x) * KNOCKBACK_VELOCITY;
-				self->vSpeed = -KNOCKBACK_VELOCITY;
 				gFlicker = FLICKER_FRAMES;
-				sbCharData(self, State, hp) -= sbCharData(collision, Stats, thorns);
+				if (sbCharData(collision, State, rolling))
+					sbCharData(self, State, hp) -= sbCharData(collision, Stats, rollDamage);
+				else
+					sbCharData(self, State, hp) -= sbCharData(collision, Stats, thorns);
 			} else if (sPlayerRolling) {
-				sbCharData(collision, State, fadeOut) = FADE_OUT_TIME;
+				sbCharData(collision, State, hp) -= sbCharData(self, Stats, rollDamage);
 				collision->hSpeed = ENEMY_KNOCKBACK_VELOCITY * self->scaleX;
 				collision->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
 			}
@@ -184,6 +185,6 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	uint32 size = 75;
 	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, size, 12);
 	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, 0, 0, (int)((sbCharData(self, State, hp) / sbCharData(self, Stats, maxHP) * size)), 12);
-	jamFontRender(sGameFont, (int)round(jamRendererGetCameraX()) + 9, (int)round(jamRendererGetCameraY()) + 10, "HP: %f%%", round(sbCharData(self, State, hp)));
+	jamFontRender(sGameFont, (int)round(jamRendererGetCameraX()) + 9, (int)round(jamRendererGetCameraY()) + 10, "Level %f", round(sbCharData(self, Stats, level)));
 }
 ////////////////////////////////////////////////////////////

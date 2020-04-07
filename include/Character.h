@@ -24,6 +24,7 @@ typedef struct {
 		double rollCooldown; // Cooldown time between rolls in delta
 		double maxHP;        // Max health of the character
 		double airRes;       // Resistance to roll damage while mid-air
+		double level;        // This character's level
 	} Stats;
 
 	// Information about this character
