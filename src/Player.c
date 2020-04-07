@@ -53,10 +53,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	static bool sPlayerJumped = false;
 	static bool sPlayerRolling = false;
 	static bool sInvincible = false;
-	static double sRollCooldown = 0;
-	static double sRollDuration = 0;
-	bool hor, vert;
-	bool standing = jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1);
+	bool vert;
 	if (sPlayerWalkSprite == NULL && sPlayerStandSprite == NULL && sPlayerJumpSprite == NULL) {
 		sPlayerWalkSprite = jamAssetHandlerGetSprite(gGameData, "PlayerMovingSprite");
 		sPlayerStandSprite = jamAssetHandlerGetSprite(gGameData, "PlayerStandingSprite");
@@ -120,12 +117,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 
 	// Collisions
 	if (sbProcessCharacterDeath(world, self)) {
-		sbProcCharacterCollisions(world, self, &hor, &vert);
-		if (hor) {
-			sPlayerRolling = false;
-			sRollCooldown = 0;
-			sRollDuration = 0;
-		}
+		sbProcCharacterCollisions(world, self, NULL, &vert);
 		if (vert)
 			sPlayerJumped = false;
 	}
@@ -136,13 +128,13 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	self->x = clamp(self->x, 0, world->worldMaps[0]->width * world->worldMaps[0]->cellWidth);
 
 	// Tween the camera position towards the player
-	double xx = jamRendererGetCameraX() + (((self->x - GAME_WIDTH / 2) - jamRendererGetCameraX()) * 0.25);
+	double xx = jamRendererGetCameraX() + (((self->x - GAME_WIDTH / 2.0) - jamRendererGetCameraX()) * 0.25);
 	double yy;
 
 	if (sbMessageActive())
-		yy = jamRendererGetCameraY() + ((((self->y + 32 - GAME_HEIGHT / 2) - 25) - jamRendererGetCameraY()) * 0.25);
+		yy = jamRendererGetCameraY() + ((((self->y + 32 - GAME_HEIGHT / 2.0) - 25) - jamRendererGetCameraY()) * 0.25);
 	else
-		yy = jamRendererGetCameraY() + ((((self->y - GAME_HEIGHT / 2) - 25) - jamRendererGetCameraY()) * 0.25);
+		yy = jamRendererGetCameraY() + ((((self->y - GAME_HEIGHT / 2.0) - 25) - jamRendererGetCameraY()) * 0.25);
 
 	// The camera is clamped to only show the game world
 	jamRendererSetCameraPos(
