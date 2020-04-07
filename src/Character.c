@@ -50,14 +50,14 @@ void sbProcCharacterPhysics(JamWorld *world, JamEntity *self, bool jump, double 
 	}
 
 	// Rolling
-	/*if (onGround && !sbGetCharacterRolling(self) && sbGetCharacterRollCooldown(self) <= 0 &&
-		sbGetCharacterRollDuration(self) <= 0 && (!sbMessageActive() ? roll : false)) {
-		sbSetCharacterRolling(self, true);
-		self->hSpeed = ROLL_SPEED * self->scaleX;
-		sbSetCharacterRollCooldown(self, sbGetCharacterRollCooldown(self));
-		sbSetCharacterRollDuration(self, sbGetCharacterRollDuration(self));
+	if (onGround && !sbCharData(self, State, rolling) && sbCharData(self, State, rollCooldown) <= 0 &&
+		sbCharData(self, State, rollDuration) <= 0 && (!sbMessageActive() ? roll : false)) {
+		sbCharData(self, State, rolling) = true;
+		self->hSpeed = sbCharData(self, Stats, rollSpeed) * self->scaleX;
+		sbCharData(self, State, rollCooldown) = sbCharData(self, Stats, rollCooldown);
+		sbCharData(self, State, rollDuration) = sbCharData(self, Stats, rollDuration);
 	}
-	sRollCooldown -= jamRendererGetDelta();*/
+	if (!sbCharData(self, State, rolling)) sbCharTick(self, rollCooldown);
 
 	// Jump if possible
 	if (onGround && jump) {
@@ -77,10 +77,10 @@ void sbProcCharacterAnimations(JamWorld *world, JamEntity *self, JamSprite *walk
 	if (jamEntityTileMapCollision(self, world->worldMaps[WORLD_WALL_LAYER], self->x, self->y + 1)) {
 		if (self->hSpeed != 0) {
 			jamEntitySetSprite(self, walking);
-			self->rot = stopRot ? 0 : self->rot;
+			self->rot = stopRot && !sbCharData(self, State, rolling) ? 0 : self->rot;
 		} else {
 			jamEntitySetSprite(self, standing);
-			self->rot = stopRot ? 0 : self->rot;
+			self->rot = stopRot && !sbCharData(self, State, rolling) ? 0 : self->rot;
 		}
 	} else {
 		jamEntitySetSprite(self, jumping);
@@ -89,6 +89,15 @@ void sbProcCharacterAnimations(JamWorld *world, JamEntity *self, JamSprite *walk
 		self->scaleX = 1;
 	else if (self->hSpeed < 0)
 		self->scaleX = -1;
+
+	// Rolling effects
+	if (sbCharData(self, State, rolling)) {
+		self->rot += 360 / sbCharData(self, Stats, rollDuration) * self->scaleX;
+		sbCharTick(self, rollDuration);
+		self->hSpeed = ROLL_SPEED * self->scaleX;
+		if (sbCharData(self, State, rollDuration) <= 0)
+			sbCharData(self, State, rolling) = false;
+	}
 }
 ////////////////////////////////////////////////////////////////////////
 

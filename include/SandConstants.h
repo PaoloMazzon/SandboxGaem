@@ -44,10 +44,9 @@
 #define MAXIMUM_PLAYER_RUN_VELOCITY 3.5
 #define PLAYER_ACCELERATION 0.20
 #define PLAYER_JUMP_VELOCITY (-5.5)
-#define ROLL_SPEED 4
-#define ROLL_COOLDOWN 5
-#define ROLL_ROT_SPEED 20
-#define ROLL_DURATION 17
+#define ROLL_SPEED 3
+#define ROLL_COOLDOWN 20
+#define ROLL_DURATION 15
 
 ////////// Enemy physics //////////
 #define ENEMY_FADE_OUT_TIME (60 * 1)

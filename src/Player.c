@@ -27,6 +27,14 @@ void onPlayerCreate(JamWorld* world, JamEntity* self) {
 								  "His grit was unmatched\n"
 								  "And his chain unlatched\n"
 								  "He thought himself a legend, deathless", self->id);
+
+	sbCharData(self, Stats, thorns) = 0;
+	sbCharData(self, Stats, rollDamage) = 0;
+	sbCharData(self, Stats, rollSpeed) = ROLL_SPEED;
+	sbCharData(self, Stats, rollDuration) = ROLL_DURATION;
+	sbCharData(self, Stats, rollCooldown) = ROLL_COOLDOWN;
+	sbCharData(self, Stats, maxHP) = 100;
+	sbCharData(self, Stats, airRes) = 0;
 }
 ////////////////////////////////////////////////////////////
 
@@ -81,16 +89,6 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		collision = jamWorldEntityCollision(world, self, self->x, self->y);
 	}
 
-	// Rolling
-	if (standing && !sPlayerRolling && sRollCooldown <= 0 && sRollDuration <= 0 &&
-			(!sbMessageActive() ? jamControlMapCheck(gControlMap, "roll") : false)) {
-		sPlayerRolling = true;
-		self->hSpeed = ROLL_SPEED * self->scaleX;
-		sRollCooldown = ROLL_COOLDOWN;
-		sRollDuration = ROLL_DURATION;
-	}
-	sRollCooldown -= jamRendererGetDelta();
-
 	// Physics
 	sbProcCharacterPhysics(
 			world,
@@ -118,13 +116,6 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	// Spinning effects
 	if (sPlayerJumped)
 		self->rot += jamRendererGetDelta() * self->scaleX * JUMP_ROT_SPEED;
-	if (sPlayerRolling) {
-		self->rot += jamRendererGetDelta() * self->scaleX * ROLL_ROT_SPEED;
-		sRollDuration -= jamRendererGetDelta();
-		self->hSpeed = ROLL_SPEED * self->scaleX;
-		if (sRollDuration <= 0)
-			sPlayerRolling = false;
-	}
 
 	// Collisions
 	sbProcCharacterCollisions(world, self, &hor, &vert);
