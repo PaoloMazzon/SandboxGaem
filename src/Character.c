@@ -8,10 +8,13 @@
 
 ////////////////////////////////////////////////////////////////////
 bool sbProcessCharacterDeath(JamWorld *world, JamEntity *enemy) {
+	if (sbCharData(enemy, State, hp) <= 0 && sbCharData(enemy, State, fadeOut) == 0)
+		sbCharData(enemy, State, fadeOut) = FADE_OUT_TIME;
+	
 	if (sbCharData(enemy, State, fadeOut) != 0) {
 		enemy->rot += ENEMY_DEATH_ROT_SPEED;
 		enemy->vSpeed += COMICAL_GRAVITY_ACCELERATION - GRAVITY_ACCELERATION;
-		enemy->alpha = (uint8) (sbCharData(enemy, State, fadeOut) / ENEMY_FADE_OUT_TIME * 255);
+		enemy->alpha = (uint8) (sbCharData(enemy, State, fadeOut) / FADE_OUT_TIME * 255);
 		sbCharTick(enemy, fadeOut);
 		if (sbCharData(enemy, State, fadeOut) <= 0) {
 			enemy->destroy = true;

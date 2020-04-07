@@ -49,7 +49,7 @@
 #define ROLL_DURATION 15
 
 ////////// Enemy physics //////////
-#define ENEMY_FADE_OUT_TIME (60 * 1)
+#define FADE_OUT_TIME (60 * 1)
 #define ENEMY_DEATH_ROT_SPEED 14
 #define ENEMY_KNOCKBACK_VELOCITY 2
 

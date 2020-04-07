@@ -13,6 +13,8 @@ void onSkellyManCreate(JamWorld* world, JamEntity* self) {
 											  "But for commoners at hand\n"
 											  "We are a kind little band\n"
 											  "That are never too far out of sight";
+	sbCharData(self, State, hp) = 100;
+	sbCharData(self, Stats, maxHP) = 100;
 }
 
 void onSkellyManDestroy(JamWorld* world, JamEntity* self) {

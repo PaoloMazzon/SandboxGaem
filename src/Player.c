@@ -10,8 +10,6 @@
 extern JamAssetHandler* gGameData;
 extern JamControlMap* gControlMap;
 static double gFlicker; // This is to flicker when the player gets hit for x frames
-static int gPlayerHP = 100;
-static int gMaxPlayerHP = 100;
 
 ////////////////////////////////////////////////////////////
 void onPlayerCreate(JamWorld* world, JamEntity* self) {
@@ -35,6 +33,8 @@ void onPlayerCreate(JamWorld* world, JamEntity* self) {
 	sbCharData(self, Stats, rollCooldown) = ROLL_COOLDOWN;
 	sbCharData(self, Stats, maxHP) = 100;
 	sbCharData(self, Stats, airRes) = 0;
+	sbCharData(self, Stats, maxHP) = 100;
+	sbCharData(self, State, hp) = 100;
 }
 ////////////////////////////////////////////////////////////
 
@@ -75,9 +75,9 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 				self->hSpeed = sign(self->x - collision->x) * KNOCKBACK_VELOCITY;
 				self->vSpeed = -KNOCKBACK_VELOCITY;
 				gFlicker = FLICKER_FRAMES;
-				gPlayerHP -= sbCharData(collision, Stats, thorns);
+				sbCharData(self, State, hp) -= sbCharData(collision, Stats, thorns);
 			} else if (sPlayerRolling) {
-				sbCharData(collision, State, fadeOut) = ENEMY_FADE_OUT_TIME;
+				sbCharData(collision, State, fadeOut) = FADE_OUT_TIME;
 				collision->hSpeed = ENEMY_KNOCKBACK_VELOCITY * self->scaleX;
 				collision->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
 			}
@@ -118,14 +118,16 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		self->rot += jamRendererGetDelta() * self->scaleX * JUMP_ROT_SPEED;
 
 	// Collisions
-	sbProcCharacterCollisions(world, self, &hor, &vert);
-	if (hor) {
-		sPlayerRolling = false;
-		sRollCooldown = 0;
-		sRollDuration = 0;
+	if (sbProcessCharacterDeath(world, self)) {
+		sbProcCharacterCollisions(world, self, &hor, &vert);
+		if (hor) {
+			sPlayerRolling = false;
+			sRollCooldown = 0;
+			sRollDuration = 0;
+		}
+		if (vert)
+			sPlayerJumped = false;
 	}
-	if (vert)
-		sPlayerJumped = false;
 
 	sbProcCharacterMovement(world, self);
 
@@ -181,7 +183,7 @@ void onPlayerDraw(JamWorld* world, JamEntity* self) {
 	// Draw the player health
 	uint32 size = 75;
 	jamDrawRectangleFilled((int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, size, 12);
-	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, 0, 0, (int)(((double)gPlayerHP / (double)gMaxPlayerHP) * size), 12);
-	jamFontRender(sGameFont, (int)round(jamRendererGetCameraX()) + 9, (int)round(jamRendererGetCameraY()) + 10, "HP: %f%%", round((double)gPlayerHP));
+	jamDrawTexturePart(sHealthBarTex, (int)round(jamRendererGetCameraX()) + 8, (int)round(jamRendererGetCameraY()) + 8, 0, 0, (int)((sbCharData(self, State, hp) / sbCharData(self, Stats, maxHP) * size)), 12);
+	jamFontRender(sGameFont, (int)round(jamRendererGetCameraX()) + 9, (int)round(jamRendererGetCameraY()) + 10, "HP: %f%%", round(sbCharData(self, State, hp)));
 }
 ////////////////////////////////////////////////////////////
