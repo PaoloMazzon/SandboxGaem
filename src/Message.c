@@ -107,7 +107,7 @@ void sbDrawMessage(JamWorld* world) {
 	JamEntity* speaker;
 	if (gMessageQueue.queueEnd > 0) {
 		texX = (sint32)round(jamRendererGetCameraX()) + (GAME_WIDTH - gMessageTexture->w) / 2;
-		texY = (sint32)round(jamRendererGetCameraY()) + (GAME_HEIGHT - gMessageTexture->h) - 4;
+		texY = (sint32)round(jamRendererGetCameraY()) + (GAME_HEIGHT - gMessageTexture->h) - 2;
 
 		// The textbox
 		jamDrawTexture(gMessageTexture, texX, texY);

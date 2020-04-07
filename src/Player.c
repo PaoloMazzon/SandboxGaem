@@ -63,19 +63,19 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		if (IS_TYPE_ENEMY(collision->type)) {
 			// Throw the player away from the enemy if colliding or if rolling throw the enemy out
 			if (gFlicker <= 0 && !sPlayerRolling && !sInvincible
-				&& sbGetCharacterFadeOut(collision) == 0) {
+				&& sbCharData(collision, State, fadeOut) == 0) {
 				self->hSpeed = sign(self->x - collision->x) * KNOCKBACK_VELOCITY;
 				self->vSpeed = -KNOCKBACK_VELOCITY;
 				gFlicker = FLICKER_FRAMES;
-				gPlayerHP -= sbGetCharacterThorns(collision);
+				gPlayerHP -= sbCharData(collision, Stats, thorns);
 			} else if (sPlayerRolling) {
-				sbSetCharacterFadeOut(collision, ENEMY_FADE_OUT_TIME);
+				sbCharData(collision, State, fadeOut) = ENEMY_FADE_OUT_TIME;
 				collision->hSpeed = ENEMY_KNOCKBACK_VELOCITY * self->scaleX;
 				collision->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
 			}
 		} else if (IS_TYPE_NPC(collision->type)) {
 			if (jamControlMapCheck(gControlMap, "interact"))
-				sbQueueMessage(sbGetCharacterName(collision), sbGetCharacterPassiveDialogue(collision), collision->id);
+				sbQueueMessage(sbCharData(collision, Info, name), sbCharData(collision, Info, passiveDialogue), collision->id);
 		}
 
 		collision = jamWorldEntityCollision(world, self, self->x, self->y);
@@ -102,7 +102,8 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 			PLAYER_JUMP_VELOCITY,
 			(jamControlMapCheck(gControlMap, "run") ? MAXIMUM_PLAYER_RUN_VELOCITY
 													: MAXIMUM_PLAYER_WALK_VELOCITY),
-			&sPlayerJumped
+			&sPlayerJumped,
+			jamControlMapCheck(gControlMap, "roll") != 0
 	);
 
 	sbProcCharacterAnimations(

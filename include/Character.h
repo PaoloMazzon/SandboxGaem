@@ -5,11 +5,14 @@
 typedef struct {
 	// What the character is currently up to
 	struct {
-		double moveTime;  // Amount of time remaining in this walking bit
-		double pauseTime; // Amount of time remaining in this pause
-		double movement;  // Which direction to move in
-		bool rolling;     // Weather or not this character is rolling
-		double fadeOut;   // Death fade out timer
+		double moveTime;     // Amount of time remaining in this walking bit
+		double pauseTime;    // Amount of time remaining in this pause
+		double movement;     // Which direction to move in
+		bool rolling;        // Weather or not this character is rolling
+		double rollCooldown; // Current cooldown on the roll
+		double rollDuration; // Current duration of the roll
+		double hp;           // Current hp
+		double fadeOut;      // Death fade out timer
 	} State;
 
 	// Information about the rpg bits
@@ -19,7 +22,6 @@ typedef struct {
 		double rollSpeed;    // Speed of this character while rolling
 		double rollDuration; // Duration of the roll in delta
 		double rollCooldown; // Cooldown time between rolls in delta
-		double hp;           // Current health of the character
 		double maxHP;        // Max health of the character
 		double airRes;       // Resistance to roll damage while mid-air
 	} Stats;
@@ -33,107 +35,14 @@ typedef struct {
 
 //////////////////// Common Data ////////////////////
 
-/// \brief Gets an entity's passiveDialogue
-const char* sbGetCharacterPassiveDialogue(JamEntity* ent);
+/// \brief Gets the specific character variable of an entity
+#define sbCharData(ent, type, attr) (((CharacterData*)ent->data)->type.attr)
 
-/// \brief Sets an entity's passiveDialogue
-void sbSetCharacterPassiveDialogue(JamEntity* ent, const char* passiveDialogue);
+/// \brief Reduces an attribute from State by the delta
+#define sbCharTick(ent, attr) (((CharacterData*)ent->data)->State.attr) -= jamRendererGetDelta()
 
-/// \brief Gets an entity's name
-const char* sbGetCharacterName(JamEntity* ent);
-
-/// \brief Sets an entity's name
-void sbSetCharacterName(JamEntity* ent, const char* name);
-
-/// \brief Checks weather or not an entity is rolling
-bool sbGetCharacterRolling(JamEntity* ent);
-
-/// \brief Gets an entity's thorns
-double sbGetCharacterThorns(JamEntity* ent);
-
-/// \brief Sets an entity's thorns
-void sbSetCharacterThorns(JamEntity* ent, double thorns);
-
-/// \brief Gets an entity's thorns
-double sbGetCharacterRollDamage(JamEntity* ent);
-
-/// \brief Sets an entity's thorns
-void sbSetCharacterRollDamage(JamEntity* ent, double thorns);
-
-/// \brief Gets an entity's rollSpeed
-double sbGetCharacterRollSpeed(JamEntity* ent);
-
-/// \brief Sets an entity's rollSpeed
-void sbSetCharacterRollSpeed(JamEntity* ent, double rollSpeed);
-
-/// \brief Gets an entity's rollDuration
-double sbGetCharacterRollDuration(JamEntity* ent);
-
-/// \brief Sets an entity's rollDuration
-void sbSetCharacterRollDuration(JamEntity* ent, double rollDuration);
-
-/// \brief Gets an entity's rollCooldown
-double sbGetCharacterRollCooldown(JamEntity* ent);
-
-/// \brief Sets an entity's rollCooldown
-void sbSetCharacterRollCooldown(JamEntity* ent, double rollCooldown);
-
-/// \brief Gets an entity's hp
-double sbGetCharacterHp(JamEntity* ent);
-
-/// \brief Sets an entity's hp
-void sbSetCharacterHp(JamEntity* ent, double hp);
-
-/// \brief Gets an entity's maxHP
-double sbGetCharacterMaxHP(JamEntity* ent);
-
-/// \brief Sets an entity's maxHP
-void sbSetCharacterMaxHP(JamEntity* ent, double maxHP);
-
-/// \brief Gets an entity's airRes
-double sbGetCharacterAirRes(JamEntity* ent);
-
-/// \brief Sets an entity's airRes
-void sbSetCharacterAirRes(JamEntity* ent, double airRes);
-
-/// \brief Processes an enemy's death animation should he be dead, returning weather or not to process collisions
+/// \brief Processes an entity's death and returns weather or not to perform collisions
 bool sbProcessCharacterDeath(JamWorld *world, JamEntity *enemy);
-
-/// \brief Gets the moveTime from an entity
-double sbGetCharacterMoveTime(JamEntity *enemy);
-
-/// \brief Sets the moveTime of an entity
-void sbSetCharacterMoveTime(JamEntity *enemy, double moveTime);
-
-/// \brief Subtracts the delta from MoveTime
-void sbTickCharacterMoveTime(JamEntity *enemy);
-
-/// \brief Gets the pauseTime from an entity
-double sbGetCharacterPauseTime(JamEntity *enemy);
-
-/// \brief Sets the pauseTime of an entity
-void sbSetCharacterPauseTime(JamEntity *enemy, double pauseTime);
-
-/// \brief Subtracts the delta from PauseTime
-void sbTickCharacterPauseTime(JamEntity *enemy);
-
-/// \brief Gets the movement from an entity
-double sbGetCharacterMovement(JamEntity *enemy);
-
-/// \brief Sets the movement of an entity
-void sbSetCharacterMovement(JamEntity *enemy, double movement);
-
-/// \brief Gets the fadeOut from an entity
-double sbGetCharacterFadeOut(JamEntity *enemy);
-
-/// \brief Checks if an enemy is dead (fade out has begun)
-bool sbGetCharacterDead(JamEntity *enemy);
-
-/// \brief Sets the fadeOut of an entity
-void sbSetCharacterFadeOut(JamEntity *enemy, double fadeOut);
-
-/// \brief Subtracts the delta from fade out
-void sbTickCharacterFadeOut(JamEntity *enemy);
 
 /// \brief Processes an entity's general physics but collisions are done with sbProcessCollisions
 /// \param world World the entity is in
@@ -146,7 +55,7 @@ void sbTickCharacterFadeOut(JamEntity *enemy);
 /// \param maxVelocity The maximum horizontal velocity of this entity
 /// \param jumped Optional value set to weather or not the entity successfully jumped
 void sbProcCharacterPhysics(JamWorld *world, JamEntity *self, bool jump, double movement, bool friction,
-							double acceleration, double jumpSpeed, double maxVelocity, bool *jumped);
+							double acceleration, double jumpSpeed, double maxVelocity, bool *jumped, bool roll);
 
 /// \brief Processes an entity's animations
 /// \param world World the entity is in

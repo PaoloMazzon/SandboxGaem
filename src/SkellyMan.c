@@ -7,12 +7,12 @@ extern JamAssetHandler* gGameData;
 
 void onSkellyManCreate(JamWorld* world, JamEntity* self) {
 	onCharacterCreate(world, self);
-	sbSetCharacterName(self, "Skellyman");
-	sbSetCharacterPassiveDialogue(self, "By day, by night, we instill fright\n"
-										"Little known, we run not from light\n"
-										"But for commoners at hand\n"
-										"We are a kind little band\n"
-										"That are never too far out of sight");
+	sbCharData(self, Info, name) = "Skellyman";
+	sbCharData(self, Info, passiveDialogue) = "By day, by night, we instill fright\n"
+										      "Little known, we run not from light\n"
+											  "But for commoners at hand\n"
+											  "We are a kind little band\n"
+											  "That are never too far out of sight";
 }
 
 void onSkellyManDestroy(JamWorld* world, JamEntity* self) {
@@ -31,17 +31,17 @@ void onSkellyManFrame(JamWorld* world, JamEntity* self) {
 		sSkellyWalk = jamAssetHandlerGetSprite(gGameData, "SkellyManRunningSprite");
 
 	// Determine where this feller going
-	if (sbGetCharacterPauseTime(self) > 0) {
-		sbTickCharacterPauseTime(self);
-	} else if (sbGetCharacterPauseTime(self) <= 0 && sbGetCharacterMoveTime(self) <= 0) {
-		sbSetCharacterMoveTime(self, SKELLYMAN_WALK_INTERVAL);
-		sbSetCharacterMovement(self, rand() > RAND_MAX / 2 ? 1 : -1);
+	if (sbCharData(self, State, pauseTime) > 0) {
+		sbCharTick(self, pauseTime);
+	} else if (sbCharData(self, State, pauseTime) <= 0 && sbCharData(self, State, moveTime) <= 0) {
+		sbCharData(self, State, moveTime) = SKELLYMAN_WALK_INTERVAL;
+		sbCharData(self, State, movement) = rand() > RAND_MAX / 2 ? 1 : -1;
 	}
-	if (sbGetCharacterMoveTime(self) > 0) {
-		sbTickCharacterMoveTime(self);
-		if (sbGetCharacterMoveTime(self) <= 0) {
-			sbSetCharacterPauseTime(self, SKELLYMAN_PAUSE_INTERVAL);
-			sbSetCharacterMovement(self, 0);
+	if (sbCharData(self, State, moveTime) > 0) {
+		sbCharTick(self, moveTime);
+		if (sbCharData(self, State, moveTime) <= 0) {
+			sbCharData(self, State, pauseTime) = SKELLYMAN_PAUSE_INTERVAL;
+			sbCharData(self, State, movement) = 0;
 		}
 	}
 
@@ -49,20 +49,21 @@ void onSkellyManFrame(JamWorld* world, JamEntity* self) {
 			world,
 			self,
 			false,
-			!sbGetCharacterDead(self) ? sbGetCharacterMovement(self) : 0,
-			!sbGetCharacterDead(self),
+			!sbCharData(self, State, fadeOut) ? sbCharData(self, State, movement) : 0,
+			!sbCharData(self, State, fadeOut),
 			SKELLYMAN_ACCELERATION,
 			0,
-			!sbGetCharacterDead(self) ? SKELLYMAN_MAX_SPEED : FAST_SPEED,
-			NULL
+			!sbCharData(self, State, fadeOut) ? SKELLYMAN_MAX_SPEED : FAST_SPEED,
+			NULL,
+			false
 	);
 
-	sbProcCharacterAnimations(world, self, sSkellyWalk, sSkellyStand, sSkellyStand, !sbGetCharacterDead(self));
+	sbProcCharacterAnimations(world, self, sSkellyWalk, sSkellyStand, sSkellyStand, !sbCharData(self, State, fadeOut));
 
 	if (sbProcessCharacterDeath(world, self)) {
 		sbProcCharacterCollisions(world, self, &horizontal, NULL);
-		if (horizontal && sbGetCharacterMovement(self) != 0)
-			sbSetCharacterMovement(self, sbGetCharacterMovement(self) == 1 ? -1 : 1);
+		if (horizontal && sbCharData(self, State, movement) != 0)
+			sbCharData(self, State, movement) = sbCharData(self, State, movement) == 1 ? -1 : 1;
 	}
 
 	sbProcCharacterMovement(world, self);
