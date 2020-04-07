@@ -1,32 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="200" height="60" tilewidth="8" tileheight="8" infinite="0" nextlayerid="51" nextobjectid="13">
- <tileset firstgid="1" name="DirtTilesetSprite" tilewidth="8" tileheight="8" tilecount="48" columns="48">
-  <image source="dirttileset.png" width="384" height="8"/>
- </tileset>
- <tileset firstgid="49" name="IndustrialTilesetSprite" tilewidth="8" tileheight="8" tilecount="48" columns="48">
-  <image source="industrial.png" width="384" height="8"/>
- </tileset>
- <tileset firstgid="97" name="ForegroundTilesSprite" tilewidth="8" tileheight="8" tilecount="64" columns="8">
-  <image source="foregroundtiles.png" width="64" height="64"/>
- </tileset>
- <tileset firstgid="161" name="BackgroundTilesSprite" tilewidth="8" tileheight="8" tilecount="64" columns="8">
-  <image source="backgroundtiles.png" width="64" height="64"/>
- </tileset>
- <tileset firstgid="225" name="ForefrontTilesSprite" tilewidth="8" tileheight="8" tilecount="64" columns="8">
-  <image source="forefronttiles.png" width="64" height="64"/>
- </tileset>
- <tileset firstgid="289" name="WoodTilesetSprite" tilewidth="8" tileheight="8" tilecount="48" columns="48">
-  <image source="woodtileset.png" width="384" height="8"/>
- </tileset>
- <tileset firstgid="337" name="Entities" tilewidth="8" tileheight="16" tilecount="2" columns="0">
-  <grid orientation="orthogonal" width="1" height="1"/>
-  <tile id="1">
-   <image width="7" height="12" source="playerstatic.png"/>
-  </tile>
-  <tile id="2">
-   <image width="8" height="16" source="skellymanstatic.png"/>
-  </tile>
- </tileset>
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="200" height="60" tilewidth="8" tileheight="8" infinite="0" nextlayerid="51" nextobjectid="16">
+ <tileset firstgid="1" source="DirtTilesetSprite.tsx"/>
+ <tileset firstgid="49" source="IndustrialTilesetSprite.tsx"/>
+ <tileset firstgid="97" source="ForegroundTilesSprite.tsx"/>
+ <tileset firstgid="161" source="BackgroundTilesSprite.tsx"/>
+ <tileset firstgid="225" source="ForefrontTilesSprite.tsx"/>
+ <tileset firstgid="289" source="WoodTilesetSprite.tsx"/>
+ <tileset firstgid="337" source="Entities.tsx"/>
  <layer id="47" name="Background" width="200" height="60">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
