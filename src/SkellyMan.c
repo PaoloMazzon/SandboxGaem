@@ -15,6 +15,7 @@ void onSkellyManCreate(JamWorld* world, JamEntity* self) {
 											  "That are never too far out of sight";
 	sbCharData(self, State, hp) = 100;
 	sbCharData(self, Stats, maxHP) = 100;
+	sbCharData(self, Stats, thorns) = 15;
 }
 
 void onSkellyManDestroy(JamWorld* world, JamEntity* self) {

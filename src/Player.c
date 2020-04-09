@@ -27,7 +27,7 @@ void onPlayerCreate(JamWorld* world, JamEntity* self) {
 								  "He thought himself a legend, deathless", self->id);
 
 	sbCharData(self, Stats, thorns) = 0;
-	sbCharData(self, Stats, rollDamage) = 0;
+	sbCharData(self, Stats, rollDamage) = 100;
 	sbCharData(self, Stats, rollSpeed) = ROLL_SPEED;
 	sbCharData(self, Stats, rollDuration) = ROLL_DURATION;
 	sbCharData(self, Stats, rollCooldown) = ROLL_COOLDOWN;
@@ -35,6 +35,7 @@ void onPlayerCreate(JamWorld* world, JamEntity* self) {
 	sbCharData(self, Stats, airRes) = 0;
 	sbCharData(self, Stats, maxHP) = 100;
 	sbCharData(self, State, hp) = 100;
+	sbCharData(self, Stats, level) = 1;
 }
 ////////////////////////////////////////////////////////////
 
@@ -51,7 +52,6 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 	static JamSprite* sPlayerStandSprite = NULL;
 	static JamSprite* sPlayerJumpSprite = NULL;
 	static bool sPlayerJumped = false;
-	static bool sPlayerRolling = false;
 	static bool sInvincible = false;
 	bool vert;
 	if (sPlayerWalkSprite == NULL && sPlayerStandSprite == NULL && sPlayerJumpSprite == NULL) {
@@ -67,14 +67,16 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		// Enemy collisions
 		if (IS_TYPE_ENEMY(collision->type)) {
 			// Throw the player away from the enemy if colliding or if rolling throw the enemy out
-			if (gFlicker <= 0 && !sPlayerRolling && !sInvincible
+			if (gFlicker <= 0 && !sbCharData(self, State, rolling) && !sInvincible
 				&& sbCharData(collision, State, fadeOut) == 0) {
 				gFlicker = FLICKER_FRAMES;
+				self->hSpeed -= sign(self->hSpeed) * KNOCKBACK_VELOCITY;
+				self->vSpeed -= 5;
 				if (sbCharData(collision, State, rolling))
 					sbCharData(self, State, hp) -= sbCharData(collision, Stats, rollDamage);
 				else
 					sbCharData(self, State, hp) -= sbCharData(collision, Stats, thorns);
-			} else if (sPlayerRolling) {
+			} else if (sbCharData(self, State, rolling)) {
 				sbCharData(collision, State, hp) -= sbCharData(self, Stats, rollDamage);
 				collision->hSpeed = ENEMY_KNOCKBACK_VELOCITY * self->scaleX;
 				collision->vSpeed = -ENEMY_KNOCKBACK_VELOCITY;
@@ -108,7 +110,7 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 			sPlayerWalkSprite,
 			sPlayerStandSprite,
 			sPlayerJumpSprite,
-			!sPlayerJumped && !sPlayerRolling
+			!sPlayerJumped
 	);
 
 	// Spinning effects
