@@ -14,18 +14,6 @@ static double gFlicker; // This is to flicker when the player gets hit for x fra
 ////////////////////////////////////////////////////////////
 void onPlayerCreate(JamWorld* world, JamEntity* self) {
 	onCharacterCreate(world, self);
-	sbStartMesssageQueue();
-	sbQueueMessage(NARRATOR_NAME, "There once lived a mate so boring\n"
-								  "Who compared to none but his flooring\n"
-								  "He decided one day\n"
-								  "To throw it all away\n"
-								  "And set out into the wild exploring", self->id);
-	sbQueueMessage(NARRATOR_NAME, "While his ignorance is naught but endless\n"
-								  "And he is caught in a rut that is friendless\n"
-								  "His grit was unmatched\n"
-								  "And his chain unlatched\n"
-								  "He thought himself a legend, deathless", self->id);
-
 	sbCharData(self, Stats, thorns) = 0;
 	sbCharData(self, Stats, rollDamage) = 100;
 	sbCharData(self, Stats, rollSpeed) = ROLL_SPEED;
