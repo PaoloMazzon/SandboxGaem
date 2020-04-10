@@ -7,3 +7,5 @@ run.sh
 Makefile
 cmake-build-debug/
 .idea/
+player.sav
+world.sav
