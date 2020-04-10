@@ -5,13 +5,60 @@
 #include <math.h>
 #include <SandConstants.h>
 #include <Message.h>
+#include <memory.h>
+#include <Buffer.h>
+#include <malloc.h>
 
 extern JamAssetHandler* gGameData;
 extern JamControlMap* gControlMap;
 extern bool gDebug;
 
-void onGenericWorldCreate(JamWorld* self, JamAssetHandler* handler) {
+//////////////////////// Helper functions ////////////////////////
+void sbSaveWorldData(const char* name, uint32 doorType) {
+	// 4 bytes for size of name (with), x bytes for name, 4 bytes for doortype
+	uint32 len = (uint32)strlen(name) + 1;
+	JamBuffer* buffer = jamBufferCreate(len + 8);
+	jamBufferAddByte4(buffer, &len);
+	jamBufferAddByteX(buffer, (void*)name, len);
+	jamBufferAddByte4(buffer, &doorType);
+	jamBufferSave(buffer, WORLD_SAVE_FILE);
+	jamBufferFree(buffer);
+}
 
+void sbLoadWorldData(const char** name, uint32* doorType) {
+	JamBuffer* buffer = jamBufferLoad(WORLD_SAVE_FILE);
+	uint32 len;
+	if (buffer != NULL && buffer->size != 0) {
+		jamBufferReadByte4(buffer, &len);
+
+		if (name != NULL) {
+			*name = malloc(len);
+			jamBufferReadByteX(buffer, (void*)*name, len);
+		} else {
+			buffer->pointer += len;
+		}
+
+		jamBufferReadByte4(buffer, doorType);
+	} else {
+		if (name != NULL) {
+			*name = malloc(14);
+			strcpy((void *) *name, "StartingWorld");
+		}
+		*doorType = 0;
+	}
+	jamBufferFree(buffer);
+}
+
+//////////////////////// Generic functions ////////////////////////
+
+void onGenericWorldCreate(JamWorld* self, JamAssetHandler* handler) {
+	uint32 doorType;
+	JamEntity* ent;
+	sbLoadWorldData(NULL, &doorType);
+	ent = jamWorldFindEntity(self, jamWorldFindEntityType(self, doorType));
+
+	if (ent != NULL)
+		jamWorldAddEntity(self, jamEntityCopy(jamAssetHandlerGetEntity(handler, "PlayerEntity"), ent->x, ent->y));
 }
 
 //////////////////////// Starting world ////////////////////////
@@ -46,15 +93,18 @@ void onStartingWorldFrame(JamWorld* self, JamAssetHandler* handler) {
 //////////////////////// Overworld 1 ////////////////////////
 void onOverworld1Frame(JamWorld* self, JamAssetHandler* handler) {
 	// Data handled by the asset handler (not our problem)
-	JamTexture* background1Tex, *background2Tex, *background3Tex, *skyTex;
-	JamFont* debugFont;
+	static JamTexture* background1Tex, *background2Tex, *background3Tex, *skyTex;
+	static JamFont* debugFont;
 
 	// Load assets
-	background1Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer1Texture");
-	background2Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer2Texture");
-	background3Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer3Texture");
-	skyTex = jamAssetHandlerGetTexture(gGameData, "SkyTexture");
-	debugFont = jamAssetHandlerGetFont(gGameData, "DebugFont");
+	if (background1Tex == NULL) {
+		background1Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer1Texture");
+		background2Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer2Texture");
+		background3Tex = jamAssetHandlerGetTexture(gGameData, "BackLayer3Texture");
+		skyTex = jamAssetHandlerGetTexture(gGameData, "SkyTexture");
+		debugFont = jamAssetHandlerGetFont(gGameData, "DebugFont");
+	}
+
 	double camX;
 	double camY;
 	bool fullscreen = false;

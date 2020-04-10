@@ -8,6 +8,12 @@
 extern "C" {
 #endif
 
+/// \brief Saves data about a door and world to a file
+void sbSaveWorldData(const char* name, uint32 doorType);
+
+/// \brief Loads data from the file about where to start the game
+void sbLoadWorldData(const char** name, uint32* doorType);
+
 /// \brief Common creation function for worlds that finds where the player should spawn and places him
 void onGenericWorldCreate(JamWorld* self, JamAssetHandler* handler);
 

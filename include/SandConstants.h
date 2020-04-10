@@ -16,12 +16,15 @@
 #define NARRATOR_NAME "Narrator"
 #define FONT_CHARACTER_WIDTH 8
 #define FONT_CHARACTER_HEIGHT 8
+#define PLAYER_SAVE_FILE "player.sav"
+#define WORLD_SAVE_FILE "location.sav"
 
 // Entity type checkers
 #define IS_TYPE_CHARACTER(t) ((t) == TYPE_PLAYER || (t) > 999)
 #define IS_TYPE_LOGIC(t) ((t) > 0 && (t) < 1000 && (t) != TYPE_PLAYER)
 #define IS_TYPE_ENEMY(t) ((t) >= 1000 && (t) < 2000)
 #define IS_TYPE_NPC(t) ((t) >= 2000 && (t) < 3000)
+#define IS_TYPE_DOOR(t) ((t) >= 3000)
 
 // Entity types of individual things
 #define TYPE_UNKNOWN 0

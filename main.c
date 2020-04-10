@@ -27,7 +27,7 @@ void runGame() {
 
 	// Load levels
 	jamWorldHandlerAdd("assets/tmx/StartingWorld.tmx", NULL, onStartingWorldCreate, onStartingWorldFrame, NULL);
-	jamWorldHandlerAdd("assets/tmx/Overworld1.tmx", NULL, NULL, onOverworld1Frame, NULL);
+	jamWorldHandlerAdd("assets/tmx/Overworld1.tmx", NULL, onGenericWorldCreate, onOverworld1Frame, NULL);
 
 	// Run the game
 	jamWorldHandlerRun(gGameData);

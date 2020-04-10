@@ -5,6 +5,8 @@
 #include <TileMap.h>
 #include <Character.h>
 #include <Message.h>
+#include "Levels.h"
+#include <Buffer.h>
 
 /////////////// Player Globals ///////////////
 extern JamAssetHandler* gGameData;
@@ -13,22 +15,44 @@ static double gFlicker; // This is to flicker when the player gets hit for x fra
 
 ////////////////////////////////////////////////////////////
 void onPlayerCreate(JamWorld* world, JamEntity* self) {
+	JamBuffer* buffer;
 	onCharacterCreate(world, self);
-	sbCharData(self, Stats, thorns) = 0;
-	sbCharData(self, Stats, rollDamage) = 100;
-	sbCharData(self, Stats, rollSpeed) = ROLL_SPEED;
-	sbCharData(self, Stats, rollDuration) = ROLL_DURATION;
-	sbCharData(self, Stats, rollCooldown) = ROLL_COOLDOWN;
-	sbCharData(self, Stats, maxHP) = 100;
-	sbCharData(self, Stats, airRes) = 0;
-	sbCharData(self, Stats, maxHP) = 100;
-	sbCharData(self, State, hp) = 100;
-	sbCharData(self, Stats, level) = 1;
+
+	// So the camera doesn't jump to the player
+	jamRendererSetCameraPos(
+			self->x - GAME_WIDTH / 2.0,
+			self->y - GAME_HEIGHT / 2.0
+	);
+
+	// Load player stats or set default ones
+	buffer = jamBufferLoad(PLAYER_SAVE_FILE);
+
+	if (buffer != NULL && buffer->size != 0) {
+		jamBufferReadByteX(buffer, &self->data, sizeof(CharacterData));
+	} else {
+		sbCharData(self, Stats, thorns) = 0;
+		sbCharData(self, Stats, rollDamage) = 100;
+		sbCharData(self, Stats, rollSpeed) = ROLL_SPEED;
+		sbCharData(self, Stats, rollDuration) = ROLL_DURATION;
+		sbCharData(self, Stats, rollCooldown) = ROLL_COOLDOWN;
+		sbCharData(self, Stats, maxHP) = 100;
+		sbCharData(self, Stats, airRes) = 0;
+		sbCharData(self, Stats, maxHP) = 100;
+		sbCharData(self, State, hp) = 100;
+		sbCharData(self, Stats, level) = 1;
+	}
+	jamBufferFree(buffer);
 }
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
 void onPlayerDestroy(JamWorld* world, JamEntity* self) {
+	// Save player data
+	JamBuffer* buffer = jamBufferCreate(sizeof(CharacterData));
+	jamBufferAddByteX(buffer, self->data, sizeof(CharacterData));
+	jamBufferSave(buffer, PLAYER_SAVE_FILE);
+	jamBufferFree(buffer);
+
     onCharacterDestroy(world, self);
 }
 ////////////////////////////////////////////////////////////
@@ -72,6 +96,9 @@ void onPlayerFrame(JamWorld* world, JamEntity* self) {
 		} else if (IS_TYPE_NPC(collision->type)) {
 			if (jamControlMapCheck(gControlMap, "interact") && !sbMessageActive())
 				sbQueueMessage(sbCharData(collision, Info, name), sbCharData(collision, Info, passiveDialogue), collision->id);
+		} else if (IS_TYPE_DOOR(collision->type) && collision->properties != NULL) {
+			sbSaveWorldData(jamTMXDataGetProperty(collision->properties, "world")->stringVal, collision->type);
+			jamWorldHandlerSwitch(jamTMXDataGetProperty(collision->properties, "world")->stringVal);
 		}
 
 		collision = jamWorldEntityCollision(world, self, self->x, self->y);
