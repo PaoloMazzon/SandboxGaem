@@ -138,7 +138,7 @@
 </data>
  </layer>
  <objectgroup id="5" name="Entities">
-  <object id="1" gid="162" x="16" y="160" width="7" height="12"/>
+  <object id="1" type="PlayerEntity" gid="162" x="16" y="160" width="7" height="12"/>
   <object id="2" type="3000" x="299.818" y="155">
    <properties>
     <property name="world" value="Overworld1"/>

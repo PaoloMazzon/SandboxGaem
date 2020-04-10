@@ -21,12 +21,26 @@ void onStartingWorldCreate(JamWorld* self, JamAssetHandler* handler) {
 								  "Who compared to none but his flooring\n"
 								  "He decided one day\n"
 								  "To throw it all away\n"
-								  "And set out into the wild exploring", self->id);
+								  "And set out into the wild exploring", ID_NOT_ASSIGNED);
 	sbQueueMessage(NARRATOR_NAME, "While his ignorance is naught but endless\n"
 								  "And he is caught in a rut that is friendless\n"
 								  "His grit was unmatched\n"
 								  "And his chain unlatched\n"
-								  "He thought himself a legend, deathless", self->id);
+								  "He thought himself a legend, deathless", ID_NOT_ASSIGNED);
+}
+
+void onStartingWorldFrame(JamWorld* self, JamAssetHandler* handler) {
+	// Draw tiles
+	jamDrawTileMap(self->worldMaps[WORLD_BACKGROUND_LAYER], 0, 0, 0, 0, 0, 0);
+	jamDrawTileMap(self->worldMaps[WORLD_FOREGROUND_LAYER], 0, 0, 0, 0, 0, 0);
+	jamDrawTileMap(self->worldMaps[WORLD_WALL_LAYER], 0, 0, 0, 0, 0, 0);
+
+	// Process the game frame
+	jamWorldProcFrame(self);
+	jamDrawTileMap(self->worldMaps[WORLD_FOREFRONT_LAYER], 0, 0, 0, 0, 0, 0);
+
+	// Draw any active messages
+	sbDrawMessage(self);
 }
 
 //////////////////////// Overworld 1 ////////////////////////
