@@ -28,7 +28,7 @@ void onPlayerCreate(JamWorld* world, JamEntity* self) {
 	buffer = jamBufferLoad(PLAYER_SAVE_FILE);
 
 	if (buffer != NULL && buffer->size != 0) {
-		jamBufferReadByteX(buffer, &self->data, sizeof(CharacterData));
+		jamBufferReadByteX(buffer, self->data, sizeof(CharacterData));
 	} else {
 		sbCharData(self, Stats, thorns) = 0;
 		sbCharData(self, Stats, rollDamage) = 100;

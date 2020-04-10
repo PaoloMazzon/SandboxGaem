@@ -18,6 +18,9 @@ JamControlMap* gControlMap;
 bool gDebug;
 
 void runGame() {
+	const char* name;
+	uint32 door;
+
 	// Data we're allocating and need to free
 	JamBehaviourMap* bMap = jamBehaviourMapCreate();
 	gGameData = jamAssetHandlerCreate(1000);
@@ -28,6 +31,11 @@ void runGame() {
 	// Load levels
 	jamWorldHandlerAdd("assets/tmx/StartingWorld.tmx", NULL, onStartingWorldCreate, onStartingWorldFrame, NULL);
 	jamWorldHandlerAdd("assets/tmx/Overworld1.tmx", NULL, onGenericWorldCreate, onOverworld1Frame, NULL);
+
+	// Load the starting world
+	sbLoadWorldData(&name, &door);
+	jamWorldHandlerSwitch(name);
+	free((void*)name);
 
 	// Run the game
 	jamWorldHandlerRun(gGameData);
