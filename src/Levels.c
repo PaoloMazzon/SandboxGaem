@@ -8,6 +8,7 @@
 #include <memory.h>
 #include <Buffer.h>
 #include <malloc.h>
+#include <string.h>
 
 extern JamAssetHandler* gGameData;
 extern JamControlMap* gControlMap;

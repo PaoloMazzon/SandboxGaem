@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <math.h>
 #include <JamEngine.h>
+#include <string.h>
 #include <SandConstants.h>
 #include <Sprite.h>
 #include <memory.h>
